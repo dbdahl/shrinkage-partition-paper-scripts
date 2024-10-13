@@ -1,0 +1,94 @@
+#!/usr/bin/env Rscript
+
+library(gourd)
+library(salso)
+
+args <- commandArgs(TRUE)
+if (length(args) != 3) {
+  cat("usage: [sp | lsp | cpp_vi | cpp_binder ] [ regions | onecluster | nclusters | chaos ] [ ri | binder | vi | ari ]\n")
+  q()
+}
+
+distr_str <- args[1]
+anchor_str <- args[2]
+loss_str <- args[3]
+
+n_samples <- 1000000
+
+regions <- scan("anchors/regions.txt")
+n_items <- length(regions)
+
+concentration <- 1.0
+baseline <- JensenLiuPartition(concentration, seq_len(n_items))
+
+sample_sp <- function(shape, anchor, n_samples) {
+  distr <- ShrinkagePartition(anchor, shape / 1, seq_len(n_items), 0.5, baseline)
+  samplePartition(distr, n_samples, randomizePermutation = TRUE, randomizeShrinkage = "common", randomizeGrit = TRUE, shrinkage_shape = shape, grit_shape1 = 2, grit_shape2 = 2)
+}
+
+sample_lsp <- function(shape, anchor, n_samples) {
+  distr <- LocationScalePartition(anchor, shape / 1, concentration, seq_len(n_items))
+  samplePartition(distr, n_samples, randomizePermutation = TRUE, randomizeShrinkage = "common", shrinkage_shape = shape)
+}
+
+sample_cpp_vi <- function(shrinkage, anchor, n_samples) {
+  distr <- CenteredPartition(anchor, shrinkage, baseline, TRUE)
+  samplePartition(distr, n_samples)
+}
+
+sample_cpp_binder <- function(shrinkage, anchor, n_samples) {
+  distr <- CenteredPartition(anchor, shrinkage, baseline, FALSE)
+  samplePartition(distr, n_samples)
+}
+
+anchor <- if (anchor_str == "regions") {
+  regions
+} else if (anchor_str == "onecluster") {
+  rep(1, n_items)
+} else if (anchor_str == "nclusters") {
+  seq_len(n_items)
+} else if (anchor_str == "chaos") {
+  regions <- scan("anchors/chaos.txt")
+} else {
+  stop("Unsupported anchor")
+}
+
+loss <- if (loss_str == "ri") {
+  RI
+} else if (loss_str == "binder") {
+  binder
+} else if (loss_str == "vi") {
+  VI
+} else if (loss_str == "ari") {
+  ARI
+} else {
+  stop("Unsupported loss")
+}
+
+out_directory <- "out/calibration"
+dir.create(out_directory, showWarnings = FALSE)
+outfilename <- file.path(out_directory, paste0(paste(args, collapse="-"),".out"))
+if (file.exists(outfilename)) {
+  cat(sprintf("File '%s' already exists.\n", outfilename))
+  q()
+}
+
+sink(outfilename)
+target <- loss(sample_sp( 4, anchor, 10*n_samples), anchor)
+cat("Target: ", target, "\n")
+
+cat("Anchor: ", anchor_str, "\n", sep="")
+cat("Loss: ", loss_str, "\n", sep="")
+if (distr_str == "sp") {
+  cat(sprintf("SP, Shape: %4.2f\n",  uniroot(\(shape) loss(sample_sp( shape, anchor, n_samples), anchor) - target, c(0.1, 10))$root))
+} else if (distr_str == "lsp"){
+  cat(sprintf("LSP, Shape: %4.2f\n", uniroot(\(shape) loss(sample_lsp(shape, anchor, n_samples), anchor) - target, c(0.0001, 100))$root))
+} else if (distr_str == "cpp_vi") {
+  cat(sprintf("CPP VI, Shrinkage: %4.2f\n",     uniroot(\(shrinkage) loss(sample_cpp_vi(shrinkage,     anchor, n_samples/10), anchor) - target, c(0.1, 40))$root))
+} else if (distr_str == "cpp_binder") {
+  cat(sprintf("CPP Binder, Shrinkage: %4.2f\n", uniroot(\(shrinkage) loss(sample_cpp_binder(shrinkage, anchor, n_samples/10), anchor) - target, c(0.1, 500))$root))
+} else {
+  stop("unsupported distribution")
+}
+sink()
+

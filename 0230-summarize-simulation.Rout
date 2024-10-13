@@ -1,0 +1,376 @@
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/env Rscript
+> 
+> library(salso)
+> library(tikzDevice)
+> library(MASS)
+> library(gourd)
+> library(fields)
+Loading required package: spam
+Spam version 2.10-0 (2023-10-23) is loaded.
+Type 'help( Spam)' or 'demo( spam)' for a short introduction 
+and overview of this package.
+Help for individual functions is also obtained by adding the
+suffix '.spam' to the function name, e.g. 'help( chol.spam)'.
+
+Attaching package: ‘spam’
+
+The following objects are masked from ‘package:base’:
+
+    backsolve, forwardsolve
+
+Loading required package: viridisLite
+
+Try help(fields) to get started.
+> 
+> regions <- scan("anchors/regions.txt")
+Read 51 items
+> n_items <- length(regions)
+> onecluster <- rep(1, n_items)
+> 
+> outfilename <- "0230-summarize-simulation"
+> outfilenames <- paste0(outfilename, "-", c("vi", "ri"), ".rds")
+> names(outfilenames) <- c("vi", "ri")
+> 
+> results <- if (all(file.exists(outfilenames))) {
++   list(vi = readRDS(outfilenames['vi']), ri = readRDS(outfilenames['ri']))
++ } else {
++   n_seq <- c(100, 400)
++   methods <- c(
++ "sp_jl-2_2-regions-4_1-0.0000",
++ "cpp_jl_binder-1-regions-198.94-0.0000",
++ "cpp_jl_binder-1-regions-202.54-0.0000",
++ "cpp_jl_vi-1-regions-12.43-0.0000",
++ "cpp_jl_vi-1-regions-18.14-0.0000",
++ "lsp-1-regions-4.03_1-0.0000",
++ "lsp-1-regions-7.10_1-0.0000",
++ "jl-1-regions-0-0.0000",
++ "sp_jl-2_2-chaos-4_1-0.0000",
++ "cpp_jl_binder-1-chaos-261.2-0.0000",
++ "cpp_jl_binder-1-chaos-262.4-0.0000",
++ "cpp_jl_vi-1-chaos-18.10-0.0000",
++ "cpp_jl_vi-1-chaos-23.32-0.0000",
++ "lsp-1-chaos-4.04_1-0.0000",
++ "lsp-1-chaos-7.10_1-0.0000",
++ "sp_jl-2_2-chaos-0.0-0.0000",
++ "sp_jl-2_2-chaos-1.0-0.0000",
++ "sp_jl-2_2-chaos-2.0-0.0000",
++ "sp_jl-2_2-chaos-3.0-0.0000",
++ "sp_jl-2_2-chaos-4.0-0.0000",
++ "sp_jl-2_2-chaos-5.0-0.0000",
++ "sp_jl-2_2-chaos-6.0-0.0000",
++ "sp_jl-2_2-regions-0.0-0.0000",
++ "sp_jl-2_2-regions-1.0-0.0000",
++ "sp_jl-2_2-regions-2.0-0.0000",
++ "sp_jl-2_2-regions-3.0-0.0000",
++ "sp_jl-2_2-regions-4.0-0.0000",
++ "sp_jl-2_2-regions-5.0-0.0000",
++ "sp_jl-2_2-regions-6.0-0.0000"
++ )
++   engine <- function(loss, loss_str) {
++     results <- lapply(n_seq, \(n) {
++       filenames <- system2("fd", c("-g", sprintf("'d2-sim-%s-*'", n), "out/in-sample/data-clean"), stdout = TRUE)
++       results <- methods |> lapply(\(method) {
++         ris <- filenames |> sapply(\(x) {
++           name <- paste0(x, "/55000-5000-10/", method, "/1/NA.rds")
++           if (!file.exists(name)) {
++             stop(sprintf("Problem: This file is missing: %s", name))
++             return(c(n=0,mean=0,LB=0,UB=0))
++           }
++           d <- readRDS(paste0(x, "/55000-5000-10/", method, "/1/NA.rds"))
++           loss(d$fit$samples$clustering, regions)
++         })
++         test <- tryCatch(t.test(ris), error = \(x) { list(estimate = mean(ris), conf.int = c(NA, NA)) })
++         r <- c(n, test$estimate, test$conf.int)
++         names(r) <- c("n", "mean", "LB", "UB")
++         r
++       })
++       names(results) <- methods
++       results2 <- Reduce(rbind, results)
++       rownames(results2) <- names(results)
++       results2
++     })
++     saveRDS(results, paste0(outfilename, "-", loss_str, ".rds"))
++     results
++   }
++   list(vi = engine(VI, "vi"), ri = engine(RI, "ri"))
++ }
+> 
+> results
+$vi
+$vi[[1]]
+                                        n      mean        LB        UB
+sp_jl-2_2-regions-4_1-0.0000          100 0.4123875 0.3420594 0.4827155
+cpp_jl_binder-1-regions-198.94-0.0000 100 0.7268730 0.6663830 0.7873631
+cpp_jl_binder-1-regions-202.54-0.0000 100 0.6801906 0.6233169 0.7370642
+cpp_jl_vi-1-regions-12.43-0.0000      100 1.7804580 1.7241053 1.8368108
+cpp_jl_vi-1-regions-18.14-0.0000      100 1.0867851 1.0423830 1.1311872
+lsp-1-regions-4.03_1-0.0000           100 1.2635819 1.1847568 1.3424070
+lsp-1-regions-7.10_1-0.0000           100 1.0696837 1.0002706 1.1390967
+jl-1-regions-0-0.0000                 100 3.4262025 3.3852966 3.4671085
+sp_jl-2_2-chaos-4_1-0.0000            100 3.4165722 3.3712939 3.4618504
+cpp_jl_binder-1-chaos-261.2-0.0000    100 3.4082815 3.3729443 3.4436187
+cpp_jl_binder-1-chaos-262.4-0.0000    100 3.4088715 3.3733663 3.4443767
+cpp_jl_vi-1-chaos-18.10-0.0000        100 2.6853355 2.6238075 2.7468635
+cpp_jl_vi-1-chaos-23.32-0.0000        100 2.8114679 2.7520403 2.8708955
+lsp-1-chaos-4.04_1-0.0000             100 3.3969216 3.3555379 3.4383054
+lsp-1-chaos-7.10_1-0.0000             100 3.3901109 3.3487191 3.4315027
+sp_jl-2_2-chaos-0.0-0.0000            100 3.4266942 3.3862065 3.4671819
+sp_jl-2_2-chaos-1.0-0.0000            100 3.4556037 3.4154995 3.4957079
+sp_jl-2_2-chaos-2.0-0.0000            100 3.4612045 3.4214300 3.5009789
+sp_jl-2_2-chaos-3.0-0.0000            100 3.4047861 3.3644852 3.4450871
+sp_jl-2_2-chaos-4.0-0.0000            100 3.4514459 3.3912538 3.5116379
+sp_jl-2_2-chaos-5.0-0.0000            100 3.5520335 3.4591753 3.6448916
+sp_jl-2_2-chaos-6.0-0.0000            100 3.6110277 3.5099534 3.7121020
+sp_jl-2_2-regions-0.0-0.0000          100 3.4273033 3.3865973 3.4680094
+sp_jl-2_2-regions-1.0-0.0000          100 3.3509558 3.3052642 3.3966473
+sp_jl-2_2-regions-2.0-0.0000          100 2.8164111 2.7374527 2.8953694
+sp_jl-2_2-regions-3.0-0.0000          100 1.7829244 1.7080175 1.8578313
+sp_jl-2_2-regions-4.0-0.0000          100 1.0297976 0.9709169 1.0886782
+sp_jl-2_2-regions-5.0-0.0000          100 0.5786904 0.5185765 0.6388043
+sp_jl-2_2-regions-6.0-0.0000          100 0.3783252 0.3185206 0.4381297
+
+$vi[[2]]
+                                        n      mean         LB        UB
+sp_jl-2_2-regions-4_1-0.0000          400 0.1252379 0.07595935 0.1745165
+cpp_jl_binder-1-regions-198.94-0.0000 400 0.2485966 0.22211909 0.2750741
+cpp_jl_binder-1-regions-202.54-0.0000 400 0.2355937 0.21005616 0.2611312
+cpp_jl_vi-1-regions-12.43-0.0000      400 0.9422645 0.89195022 0.9925788
+cpp_jl_vi-1-regions-18.14-0.0000      400 0.5132371 0.46434916 0.5621250
+lsp-1-regions-4.03_1-0.0000           400 0.4602167 0.40290639 0.5175269
+lsp-1-regions-7.10_1-0.0000           400 0.4009456 0.34793224 0.4539589
+jl-1-regions-0-0.0000                 400 2.1621144 2.11525135 2.2089774
+sp_jl-2_2-chaos-4_1-0.0000            400 2.1480207 2.09157967 2.2044616
+cpp_jl_binder-1-chaos-261.2-0.0000    400 2.3789907 2.33505290 2.4229285
+cpp_jl_binder-1-chaos-262.4-0.0000    400 2.3814860 2.33767814 2.4252938
+cpp_jl_vi-1-chaos-18.10-0.0000        400 1.5934379 1.52206309 1.6648126
+cpp_jl_vi-1-chaos-23.32-0.0000        400 1.6163216 1.53547815 1.6971651
+lsp-1-chaos-4.04_1-0.0000             400 2.1716381 2.11569365 2.2275825
+lsp-1-chaos-7.10_1-0.0000             400 2.1589285 2.09708251 2.2207745
+sp_jl-2_2-chaos-0.0-0.0000            400 2.1630781 2.11676561 2.2093905
+sp_jl-2_2-chaos-1.0-0.0000            400 2.1964284 2.15059039 2.2422663
+sp_jl-2_2-chaos-2.0-0.0000            400 2.1525573 2.09803140 2.2070832
+sp_jl-2_2-chaos-3.0-0.0000            400 2.1142073 2.04744897 2.1809656
+sp_jl-2_2-chaos-4.0-0.0000            400 2.2714064 2.19405716 2.3487557
+sp_jl-2_2-chaos-5.0-0.0000            400 2.7357291 2.65404419 2.8174139
+sp_jl-2_2-chaos-6.0-0.0000            400 3.1596357 3.12956821 3.1897032
+sp_jl-2_2-regions-0.0-0.0000          400 2.1623031 2.11611622 2.2084899
+sp_jl-2_2-regions-1.0-0.0000          400 1.9785386 1.92526995 2.0318073
+sp_jl-2_2-regions-2.0-0.0000          400 1.3536771 1.29908987 1.4082644
+sp_jl-2_2-regions-3.0-0.0000          400 0.8613685 0.80929935 0.9134376
+sp_jl-2_2-regions-4.0-0.0000          400 0.4507239 0.38840220 0.5130457
+sp_jl-2_2-regions-5.0-0.0000          400 0.2405225 0.18595428 0.2950907
+sp_jl-2_2-regions-6.0-0.0000          400 0.1449223 0.10168630 0.1881584
+
+
+$ri
+$ri[[1]]
+                                        n      mean        LB        UB
+sp_jl-2_2-regions-4_1-0.0000          100 0.9263878 0.9112727 0.9415028
+cpp_jl_binder-1-regions-198.94-0.0000 100 0.9298407 0.9244028 0.9352786
+cpp_jl_binder-1-regions-202.54-0.0000 100 0.9343212 0.9291744 0.9394681
+cpp_jl_vi-1-regions-12.43-0.0000      100 0.7867275 0.7813863 0.7920686
+cpp_jl_vi-1-regions-18.14-0.0000      100 0.8607389 0.8546491 0.8668287
+lsp-1-regions-4.03_1-0.0000           100 0.8508574 0.8428490 0.8588659
+lsp-1-regions-7.10_1-0.0000           100 0.8690365 0.8614813 0.8765916
+jl-1-regions-0-0.0000                 100 0.7000918 0.6973190 0.7028646
+sp_jl-2_2-chaos-4_1-0.0000            100 0.6891004 0.6794742 0.6987266
+cpp_jl_binder-1-chaos-261.2-0.0000    100 0.7208995 0.7165921 0.7252069
+cpp_jl_binder-1-chaos-262.4-0.0000    100 0.7203140 0.7159069 0.7247210
+cpp_jl_vi-1-chaos-18.10-0.0000        100 0.6489108 0.6400482 0.6577734
+cpp_jl_vi-1-chaos-23.32-0.0000        100 0.6324857 0.6218667 0.6431046
+lsp-1-chaos-4.04_1-0.0000             100 0.6887021 0.6851981 0.6922062
+lsp-1-chaos-7.10_1-0.0000             100 0.6830104 0.6791690 0.6868517
+sp_jl-2_2-chaos-0.0-0.0000            100 0.7001145 0.6973358 0.7028932
+sp_jl-2_2-chaos-1.0-0.0000            100 0.7026785 0.7000161 0.7053409
+sp_jl-2_2-chaos-2.0-0.0000            100 0.7018146 0.6987299 0.7048993
+sp_jl-2_2-chaos-3.0-0.0000            100 0.6867292 0.6799410 0.6935174
+sp_jl-2_2-chaos-4.0-0.0000            100 0.6668108 0.6519452 0.6816764
+sp_jl-2_2-chaos-5.0-0.0000            100 0.6536920 0.6316933 0.6756907
+sp_jl-2_2-chaos-6.0-0.0000            100 0.6512715 0.6276415 0.6749015
+sp_jl-2_2-regions-0.0-0.0000          100 0.7001633 0.6973989 0.7029277
+sp_jl-2_2-regions-1.0-0.0000          100 0.7066759 0.7039192 0.7094326
+sp_jl-2_2-regions-2.0-0.0000          100 0.7243805 0.7204539 0.7283072
+sp_jl-2_2-regions-3.0-0.0000          100 0.7679826 0.7603501 0.7756151
+sp_jl-2_2-regions-4.0-0.0000          100 0.8430108 0.8290869 0.8569348
+sp_jl-2_2-regions-5.0-0.0000          100 0.8982224 0.8818627 0.9145821
+sp_jl-2_2-regions-6.0-0.0000          100 0.9253702 0.9095030 0.9412373
+
+$ri[[2]]
+                                        n      mean        LB        UB
+sp_jl-2_2-regions-4_1-0.0000          400 0.9726597 0.9607291 0.9845903
+cpp_jl_binder-1-regions-198.94-0.0000 400 0.9744844 0.9716926 0.9772761
+cpp_jl_binder-1-regions-202.54-0.0000 400 0.9758653 0.9731724 0.9785581
+cpp_jl_vi-1-regions-12.43-0.0000      400 0.8734601 0.8648001 0.8821202
+cpp_jl_vi-1-regions-18.14-0.0000      400 0.9334966 0.9258151 0.9411781
+lsp-1-regions-4.03_1-0.0000           400 0.9369973 0.9275432 0.9464513
+lsp-1-regions-7.10_1-0.0000           400 0.9437303 0.9347073 0.9527534
+jl-1-regions-0-0.0000                 400 0.7616519 0.7581759 0.7651278
+sp_jl-2_2-chaos-4_1-0.0000            400 0.7575504 0.7540306 0.7610702
+cpp_jl_binder-1-chaos-261.2-0.0000    400 0.7751487 0.7719115 0.7783859
+cpp_jl_binder-1-chaos-262.4-0.0000    400 0.7749573 0.7717425 0.7781722
+cpp_jl_vi-1-chaos-18.10-0.0000        400 0.7515520 0.7464468 0.7566571
+cpp_jl_vi-1-chaos-23.32-0.0000        400 0.7434747 0.7384139 0.7485354
+lsp-1-chaos-4.04_1-0.0000             400 0.7504785 0.7468990 0.7540580
+lsp-1-chaos-7.10_1-0.0000             400 0.7464153 0.7428382 0.7499923
+sp_jl-2_2-chaos-0.0-0.0000            400 0.7616178 0.7581639 0.7650716
+sp_jl-2_2-chaos-1.0-0.0000            400 0.7615029 0.7581605 0.7648454
+sp_jl-2_2-chaos-2.0-0.0000            400 0.7582931 0.7549039 0.7616823
+sp_jl-2_2-chaos-3.0-0.0000            400 0.7528940 0.7493789 0.7564091
+sp_jl-2_2-chaos-4.0-0.0000            400 0.7484622 0.7449560 0.7519685
+sp_jl-2_2-chaos-5.0-0.0000            400 0.7471229 0.7443267 0.7499191
+sp_jl-2_2-chaos-6.0-0.0000            400 0.7469468 0.7451195 0.7487740
+sp_jl-2_2-regions-0.0-0.0000          400 0.7615672 0.7580943 0.7650401
+sp_jl-2_2-regions-1.0-0.0000          400 0.7737374 0.7691295 0.7783453
+sp_jl-2_2-regions-2.0-0.0000          400 0.8083565 0.7993945 0.8173185
+sp_jl-2_2-regions-3.0-0.0000          400 0.8601410 0.8453516 0.8749305
+sp_jl-2_2-regions-4.0-0.0000          400 0.9215074 0.9060350 0.9369797
+sp_jl-2_2-regions-5.0-0.0000          400 0.9520538 0.9386508 0.9654568
+sp_jl-2_2-regions-6.0-0.0000          400 0.9684318 0.9576975 0.9791662
+
+
+> 
+> ## Shrinkage and grit
+> image_directory <- "out-images"
+> dir.create(image_directory, showWarnings = FALSE)
+> 
+> x <- readRDS(paste0("out/in-sample/data-clean/d2-sim-400-1.rds/55000-5000-10/sp_jl-2_2-regions-4_1-0.0000/1/NA.rds"))
+> y <- readRDS(paste0("out/in-sample/data-clean/d2-sim-400-1.rds/55000-5000-10/sp_jl-2_2-chaos-4_1-0.0000/1/NA.rds"))
+> 
+> all_shrinkages_x <- x$fit$samples$shrinkage[, 1]
+> all_shrinkages_y <- y$fit$samples$shrinkage[, 1]
+> shrinkage_alpha_x <- 4
+> shrinkage_alpha_y <- 4
+> shrinkage_beta <- 1
+> shrinkage_mean_prior_x <- shrinkage_alpha_x / shrinkage_beta
+> shrinkage_mean_prior_y <- shrinkage_alpha_y / shrinkage_beta
+> shrinkage_mean_posterior_x <- mean(all_shrinkages_x)
+> shrinkage_mean_posterior_y <- mean(all_shrinkages_y)
+> cat("Prior mean: ", shrinkage_mean_prior_x, "\n", sep = "")
+Prior mean: 4
+> cat("Posterior mean: ", shrinkage_mean_posterior_x, "\n", sep = "")
+Posterior mean: 7.514238
+> cat("Prior mean: ", shrinkage_mean_prior_y, "\n", sep = "")
+Prior mean: 4
+> cat("Posterior mean: ", shrinkage_mean_posterior_y, "\n", sep = "")
+Posterior mean: 1.987055
+> 
+> all_grits_x <- x$fit$samples$grit
+> all_grits_y <- y$fit$samples$grit
+> grit_alpha <- 2
+> grit_beta <- 2
+> grit_mean_prior <- grit_alpha / (grit_alpha + grit_beta)
+> grit_mean_posterior_x <- mean(all_grits_x)
+> grit_mean_posterior_y <- mean(all_grits_y)
+> cat("Prior mean: ", grit_mean_prior, "\n", sep = "")
+Prior mean: 0.5
+> cat("Posterior mean: ", grit_mean_posterior_x, "\n", sep = "")
+Posterior mean: 0.3962944
+> cat("Posterior mean: ", grit_mean_posterior_y, "\n", sep = "")
+Posterior mean: 0.2409253
+>   
+> kde_x <- kde2d(all_shrinkages_x, all_grits_x, n = 100)
+> kde_y <- kde2d(all_shrinkages_y, all_grits_y, n = 100)
+> 
+> set.seed(34534512)
+> n_mc_samples <- 1000
+> shrinkage_n <- 100
+> grit_n <- 100
+> #   n_mc_samples <- 100
+> #   shrinkage_n <- 25
+> #   grit_n <- 25
+> 
+> out <- summarize_prior_on_shrinkage_and_grit(regions, n_mc_samples = n_mc_samples, shrinkage_n = shrinkage_n, shrinkage_shape = shrinkage_alpha_x, shrinkage_rate = shrinkage_beta, grit_n = grit_n, grit_shape1 = grit_alpha, grit_shape2 = grit_beta, use_crp = FALSE, concentration = 1.0, domain_specification = list(shrinkage_lim = c(0, 10), grit_lim = c(0.0, 1.0)))
+> 
+> shrinkage_grit_plot <- function(background) {
++   png(file.path(image_directory, sprintf("shrinkage_grit_%s.png", background)), width = 1500, height = 1000, pointsize = 64) # pointsize = 48
++   if (background == "posterior") {
++     par(mar = c(4, 4, 0.2, 5) + 0.1, las = 1, family = "serif", xaxs = "i", yaxs = "i", plt = c(0.170, 0.82, 0.27, 0.97696))
++     print(par(no.readonly = TRUE)$plt)
++     plot(NA, xlab = "", ylab = "", type = "n",
++       xlim = range(out$shrinkage) + c(-1,1)*(diff(range(out$shrinkage))*0.005),
++       ylim = range(out$grit) + c(-1,1)*(diff(range(out$grit))*0.005))
++     mtext("Shrinkage", 1, line = 2.5, las = 0)
++     mtext("Grit", 2, line = 2.5, las = 0)
++     contour(kde_x, add = TRUE, lwd = 6, lty = 1, drawlabels = FALSE, col = "black")
++     contour(kde_y, add = TRUE, lwd = 6, lty = 5, drawlabels = FALSE, col = "black")
++     arrows(
++       shrinkage_mean_prior_x, grit_mean_prior,
++       shrinkage_mean_posterior_x, grit_mean_posterior_x,
++       lwd = 14, cex = 1.6, pch = 21, col = "black", length = 0.4
++       )
++     arrows(
++       shrinkage_mean_prior_y, grit_mean_prior,
++       shrinkage_mean_posterior_y, grit_mean_posterior_y,
++       lwd = 14, cex = 1.6, pch = 21, col = "black", length = 0.4
++       )
++   } else {
++     par(mar = c(4, 4, 0.2, 2) + 0.1, las = 1, family = "serif", xaxs = "i", yaxs = "i")
++     image.plot(out$shrinkage, out$grit, out[[background]], xlab = "", ylab = "", legend.width = 0.7, legend.mar = 4, bigplot = c(0.170, 0.82, 0.27, 0.97696), smallplot = c(0.84, 0.869, 0.295, 0.943856))
++     mtext("Shrinkage", 1, line = 2.5, las = 0)
++     mtext("Grit", 2, line = 2.5, las = 0)
++     contour(out$shrinkage, out$grit, exp(out$log_density), add = TRUE, lwd = 6, lty = 1, drawlabels = FALSE, col = "white")
++   }
++   dev.off()
++ }
+> 
+> shrinkage_grit_plot("expected_rand_index")
+null device 
+          1 
+> shrinkage_grit_plot("expected_entropy")
+null device 
+          1 
+> shrinkage_grit_plot("posterior")
+[1] 0.17000 0.82000 0.27000 0.97696
+null device 
+          1 
+> 
+> tikz(file.path(image_directory, "simulation_1.tex"), width = 4, height = 2.7)
+> shrink_seq <- 0:6
+> chaos <- sprintf("sp_jl-2_2-1-%s.0-0.0000", shrink_seq)
+> regions <- sprintf("sp_jl-2_2-regions-%s.0-0.0000", shrink_seq)
+> par(mar = c(4, 4, 0.4, 0.2))
+> plot(NA, xlim = c(0, max(shrink_seq)), ylim = c(0.6, 1.0), xlab = "Shrinkage $\\omega$", ylab = "E(Rand Index $\\mid$ Data)",
++      axes = FALSE, xaxs = "i", yaxs = "i")
+> axis(2, las = 1)
+> axis(1, las = 1)
+> box()
+> tmp <- results$ri[[1]][row.names(results$ri[[1]]) %in% sprintf("sp_jl-2_2-regions-%0.1f-0.0000", shrink_seq), "mean"]
+> points(shrink_seq, tmp, cex = 1, lty = 3)
+> lines(shrink_seq, tmp, cex = 1, lty = 3)
+> tmp <- results$ri[[2]][row.names(results$ri[[2]]) %in% sprintf("sp_jl-2_2-regions-%0.1f-0.0000", shrink_seq), "mean"]
+> points(shrink_seq, tmp, cex = 1, lty = 1)
+> lines(shrink_seq, tmp, cex = 1, lty = 1)
+> tmp <- results$ri[[1]][row.names(results$ri[[1]]) %in% sprintf("sp_jl-2_2-chaos-%0.1f-0.0000", shrink_seq), "mean"]
+> points(shrink_seq, tmp, cex = 1, lty = 3, pch = 8)
+> lines(shrink_seq, tmp, cex = 1, lty = 3)
+> tmp <- results$ri[[2]][row.names(results$ri[[2]]) %in% sprintf("sp_jl-2_2-chaos-%0.1f-0.0000", shrink_seq), "mean"]
+> points(shrink_seq, tmp, cex = 1, lty = 1, pch = 8)
+> lines(shrink_seq, tmp, cex = 1, lty = 1)
+> legend(0.10, 1.00, c("$m=100$, $\\mu$ is regions", "$m=100$, $\\mu$ is shuffled", "$m=400$, $\\mu$ is regions", "$m=400$, $\\mu$ is shuffled"), pch=c(1,8,1,8), lty=c(3,3,1,1), cex=0.85, bty="n")
+> dev.off()
+null device 
+          1 
+> 
+> 
+> proc.time()
+   user  system elapsed 
+208.411   2.517  19.526 

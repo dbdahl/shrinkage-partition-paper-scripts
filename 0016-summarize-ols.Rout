@@ -1,0 +1,39 @@
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/env Rscript
+> 
+> options(scipen = 9, digits = 16)
+> 
+> files <- system2("fd", c("-I", "-g", "'*_*.rds'", "out/ols"), stdout = TRUE)
+> x <- lapply(files, readRDS)
+> 
+> n_observations_excluded <- x |> sapply(\(y) y$missing) |> sum()
+> ols_fit <- x |> sapply(\(y) y$logLike) |> sum()
+> ols_fit
+[1] -56610.81057730878
+> 
+> source("XX-common.R")
+> transform(ols_fit, 139555 - n_observations_excluded)
+[1] -10221.41690333772
+> 
+> 
+> proc.time()
+               user              system             elapsed 
+0.14799999999999999 0.07100000000000001 0.19900000000000001 

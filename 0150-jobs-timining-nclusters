@@ -1,0 +1,18 @@
+#!/usr/bin/fish
+
+./XX-mcmc-tuning.R fish | source
+
+# set N_ITERATIONS 55
+# set BURNIN 5
+# set THIN 1
+
+set years 1994
+for replicate in 1 2
+    for year in $years
+        for missing_item in NA
+            for concentration in 0.01 0.1 1 5 10
+                echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN sp_crp$concentration random 0.5 regions 5 0.0000 $missing_item $replicate TRUE
+            end
+        end
+    end
+end

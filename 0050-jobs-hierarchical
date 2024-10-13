@@ -1,0 +1,15 @@
+#!/usr/bin/fish
+
+./XX-mcmc-tuning.R fish | source
+
+# set N_ITERATIONS 550
+# set BURNIN 50
+# set THIN 1
+
+for RUN in (seq 10)
+    for DROP in none married race
+        for i in (seq 1 $n_replicates)
+            echo RAYON_NUM_THREADS=1 ./XX-mcmc-dependent.R hierarchical 1994-2020 0.0000 5 1 TRUE 1 1 TRUE TRUE $DROP $N_ITERATIONS $BURNIN $THIN "$i"_"$n_replicates" $RUN
+        end
+    end
+end

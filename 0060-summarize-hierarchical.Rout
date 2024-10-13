@@ -1,0 +1,174 @@
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/env Rscript
+> 
+> library(coda)
+
+Attaching package: ‘coda’
+
+The following object is masked _by_ ‘.GlobalEnv’:
+
+    thin
+
+> 
+> source("XX-common.R")
+> 
+> rep <- 1:10
+> 
+> for (drop in c("race", "married", "none")) {
++ 
++   cat("\n\nOmitted variable(s): ", drop, "\n\n\n")
++ 
++   prefix <- paste0("out/out-of-sample-hierarchical-0.0000-REP%s/55000-5000-10/5-1-TRUE-1-1-TRUE-TRUE-", drop)
++ 
++   hosts <- lapply(rep, \(rep) {
++     files <- system2("fd", c("-I", "-g", "'*.rds'", sprintf(prefix, rep)), stdout = TRUE)
++     lapply(files, \(x) readRDS(x)$host)
++   })
++   print(hosts |> unlist() |> table())
++ 
++   log_likelihood_samples <- lapply(rep, \(rep) {
++     files <- system2("fd", c("-I", "-g", "'*.rds'", sprintf(prefix, rep)), stdout = TRUE)
++     results <- lapply(files, readRDS)
++     log_likelihood_list <- lapply(results, \(x) x$fit$log_likelihood)
++     apply(Reduce(cbind, log_likelihood_list), 1, sum)
++   })
++ 
++   doit <- function(log_likelihood) {
++     n_eff <- effectiveSize(log_likelihood)
++     # Log-Likelihood (from k-fold cross validation)
++     me <- qnorm(0.975) * sqrt(var(log_likelihood) / n_eff)
++     x <- c(mean(log_likelihood) + c(-1, 0, 1) * me, me)
++     names(x) <- c("Lower", "Mean", "Upper", "Margin of Error")
++     # print(x)
++     x[2]
++   }
++ 
++   totals <- sapply(rep, \(i) doit(log_likelihood_samples[[i]]))
++   options(scipen = 9, digits = 16)
++   print(mean(totals))
++   totals <- transform(totals)
++   print(t.test(totals))
++ 
++ }
+
+
+Omitted variable(s):  race 
+
+
+
+bryce.byu.edu  dunn.byu.edu 
+           30            70 
+[1] -55670.32588491905
+
+	One Sample t-test
+
+data:  totals
+t = -151.58330974717, df = 9, p-value < 2.2204460493e-16
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ -3404.368706448759 -3304.252437717801
+sample estimates:
+        mean of x 
+-3354.31057208328 
+
+
+
+Omitted variable(s):  married 
+
+
+
+bryce.byu.edu  dunn.byu.edu 
+           22            78 
+[1] -55232.01309350509
+
+	One Sample t-test
+
+data:  totals
+t = -4.2731589641802, df = 9, p-value = 0.002070671495176
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ -326.5574259751224 -100.4859687169059
+sample estimates:
+         mean of x 
+-213.5216973460141 
+
+
+
+Omitted variable(s):  none 
+
+
+
+bryce.byu.edu  dunn.byu.edu 
+           12            88 
+[1] -54708.33466053979
+
+	One Sample t-test
+
+data:  totals
+t = 73.523183130613, df = 9, p-value = 8.055575016461e-14
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 3430.079379040285 3647.852798125407
+sample estimates:
+        mean of x 
+3538.966088582846 
+
+> 
+> 
+> cat("\n\nOmitted variable(s): ", drop, "\n\n\n")
+
+
+Omitted variable(s):  none 
+
+
+> 
+> image_directory <- "out-images"
+> dir.create(image_directory, showWarnings = FALSE)
+> 
+> files <- system2("fd", c("-I", "-g", "'*.rds'", sprintf(prefix, rep)), stdout = TRUE)
+> results <- lapply(files, readRDS)
+> k <- length(results)
+> 
+> 
+> ## Permutation acceptance rate per attempt
+> p <- mean(sapply(results, \(a) a$fit$permutation_acceptance_rate))
+> p
+[1] 0.06868080222222223
+> 
+> 
+> ## Permutation: proportion of items changed per MCMC iteration
+> proportion_changed <- mean(sapply(rep, \(rep) {
++   files <- system2("fd", c("-I", "-g", "'*.rds'", sprintf(prefix, rep)), stdout = TRUE)
++   results <- lapply(files, readRDS)
++   permutation_list <- lapply(results, \(x) x$fit$permutation)
++   mean(sapply(permutation_list, \(permutation) {
++     mean(sapply(seq_len(ncol(permutation)-1), \(i) {
++       mean(permutation[, i] != permutation[, i + 1])
++     }))
++   }))
++ }))
+> proportion_changed
+[1] 0.4341639700489117
+> 
+> 
+> proc.time()
+             user            system           elapsed 
+73.63799999999999 13.17900000000000 60.46500000000000 

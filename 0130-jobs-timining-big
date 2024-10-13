@@ -1,0 +1,14 @@
+#!/usr/bin/fish
+
+./XX-mcmc-tuning.R fish | source
+
+# set N_ITERATIONS 55
+# set BURNIN 5
+# set THIN 1
+
+for N_YEARS in (seq 27 -1 1)
+    for REP in (seq 1)
+        echo ./XX-mcmc.R mega-$N_YEARS $N_ITERATIONS $BURNIN $THIN sp_crp random 0.02 regions-mega-$N_YEARS 5 0.0000 NA $REP TRUE
+        echo ./XX-mcmc.R mega-$N_YEARS $N_ITERATIONS $BURNIN $THIN crp random 1 regions-mega-$N_YEARS 0 0.0000 NA $REP TRUE
+    end
+end

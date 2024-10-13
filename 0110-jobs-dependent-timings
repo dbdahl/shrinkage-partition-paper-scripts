@@ -1,0 +1,27 @@
+#!/usr/bin/fish
+
+./XX-mcmc-tuning.R fish | source
+
+# set N_ITERATIONS 55
+# set BURNIN 5
+# set THIN 1
+
+set N_REPS 5
+set RUN 1
+
+for REP in (seq 1 $N_REPS)
+    for YEARS in 1994-2002 1994-2011 1994-2020 1994-2020-2011 1994-2020-2002 1994-2020-1994
+        echo RAYON_NUM_THREADS=1 ./XX-mcmc-dependent.R hierarchical $YEARS 0.0000 5 1 TRUE 1 1 TRUE TRUE none $N_ITERATIONS $BURNIN $THIN $REP $RUN
+        echo RAYON_NUM_THREADS=1 ./XX-mcmc-dependent.R temporal $YEARS 0.0000 5 1 TRUE 1 1 TRUE TRUE none $N_ITERATIONS $BURNIN $THIN $REP $RUN
+    end
+end
+
+set REPS_SEQ (seq (math $N_REPS + 1) 100)
+set RUN 1
+
+for REP in $REPS_SEQ
+    for YEARS in 1994-2020
+        echo RAYON_NUM_THREADS=1 ./XX-mcmc-dependent.R hierarchical $YEARS 0.0000 5 1 TRUE 1 1 TRUE TRUE none $N_ITERATIONS $BURNIN $THIN $REP $RUN
+        echo RAYON_NUM_THREADS=1 ./XX-mcmc-dependent.R temporal $YEARS 0.0000 5 1 TRUE 1 1 TRUE TRUE none $N_ITERATIONS $BURNIN $THIN $REP $RUN
+    end
+end

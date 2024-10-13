@@ -1,0 +1,7 @@
+#!/usr/bin/fish
+
+set SRCDIR (pwd)
+set SERVER abbey.byu.edu
+
+set DIRS (ssh $SERVER echo $SRCDIR/out | sed "s|/home|$SERVER:/yunity|g" | string split ' ')
+rsync --archive --delete --progress $DIRS .

@@ -1,0 +1,31 @@
+#!/usr/bin/fish
+
+./XX-mcmc-tuning.R fish | source
+
+# set N_ITERATIONS 55
+# set BURNIN 5
+# set THIN 1
+
+set years (seq 1994 2020)
+for replicate in (seq $n_replicates)
+    for year in $years
+        for missing_item in NA
+            echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN sp_crp random 0.02 regions 5 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN sp_crp random 0.02 regions borders 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            for shrinkage in (seq 0 10 50)
+                echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN cpp_crp_vi random 1 regions $shrinkage 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            end
+            for shrinkage in 0 300 400 500 600 700
+                echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN cpp_crp_binder random 1 regions $shrinkage 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            end
+            for shrinkage in 0 14.863 250.64 3990.81 63321.754 1004498.535
+                echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN lsp random 1 regions $shrinkage 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            end
+            echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN jl random 1 regions 0 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN crp random 1 regions 0 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN fixed random 1 regions 0 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN fixed random 1 1 0 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+            echo ./XX-mcmc.R $year $N_ITERATIONS $BURNIN $THIN fixed random 1 n 0 0.0000 $missing_item $replicate"_"$n_replicates TRUE
+        end
+    end
+end

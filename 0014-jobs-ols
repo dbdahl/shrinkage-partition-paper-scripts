@@ -1,0 +1,9 @@
+#!/usr/bin/fish
+
+./XX-mcmc-tuning.R fish | source
+
+echo ./XX-fit-ols.R 1
+
+for i in (seq 1 $n_replicates)
+    echo ./XX-fit-ols.R "$i"_"$n_replicates"
+end

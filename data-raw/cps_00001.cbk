@@ -1,0 +1,426 @@
+Description: Try #1
+Samples selected:
+      IPUMS-CPS, March 1989                             regular
+      IPUMS-CPS, March 1990                             regular
+      IPUMS-CPS, March 1991                             regular
+      IPUMS-CPS, March 1992                             regular
+      IPUMS-CPS, March 1993                             regular
+      IPUMS-CPS, March 1994                             regular
+      IPUMS-CPS, March 1995                             regular
+      IPUMS-CPS, March 1996                             regular
+      IPUMS-CPS, March 1997                             regular
+      IPUMS-CPS, March 1998                             regular
+      IPUMS-CPS, March 1999                             regular
+      IPUMS-CPS, March 2000                             regular
+      IPUMS-CPS, March 2001                             regular
+      IPUMS-CPS, March 2002                             regular
+      IPUMS-CPS, March 2003                             regular
+      IPUMS-CPS, March 2004                             regular
+      IPUMS-CPS, March 2005                             regular
+      IPUMS-CPS, March 2006                             regular
+      IPUMS-CPS, March 2007                             regular
+      IPUMS-CPS, March 2008                             regular
+      IPUMS-CPS, March 2009                             regular
+      IPUMS-CPS, March 2010                             regular
+      IPUMS-CPS, March 2011                             regular
+      IPUMS-CPS, March 2012                             regular
+      IPUMS-CPS, March 2013                             regular
+      IPUMS-CPS, March 2014                             regular
+      IPUMS-CPS, March 2015                             regular
+      IPUMS-CPS, March 2016                             regular
+      IPUMS-CPS, March 2017                             regular
+      IPUMS-CPS, March 2018                             regular
+      IPUMS-CPS, March 2019                             regular
+      IPUMS-CPS, March 2020                             regular
+File Type:                    rectangular
+Case Selection:               Yes
+  Variable               Columns        Len    03/1989 03/1990 03/1991 03/1992 03/1993 03/1994 03/1995 03/1996 03/1997 03/1998 03/1999 03/2000 03/2001 03/2002 03/2003 03/2004 03/2005 03/2006 03/2007 03/2008 03/2009 03/2010 03/2011 03/2012 03/2013 03/2014 03/2015 03/2016 03/2017 03/2018 03/2019 03/2020
+  YEAR               H   1-4            4      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  MONTH              H   5-6            2      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  METRO              H   7              1      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  STATECENSUS        H   8-9            2      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  AGE                P  10-11           2      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  SEX                P  12              1      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  RACE               P  13-15           3      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  MARST              P  16              1      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  HISPAN             P  17-19           3      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  EMPSTAT            P  20-21           2      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  EDUC               P  22-24           3      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  UNION              P  25              1      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  EARNWEEK           P  26-33           8      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+  UHRSWORKORG        P  34-36           3      X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X       X 
+
+Variable Availability Key:
+All Years X - available in this sample
+All Years . - not available in this sample
+
+Case Selections:
+P AGE      18 18
+P AGE      19 19
+P AGE      20 20
+P AGE      21 21
+P AGE      22 22
+P AGE      23 23
+P AGE      24 24
+P AGE      25 25
+P AGE      26 26
+P AGE      27 27
+P AGE      28 28
+P AGE      29 29
+P AGE      30 30
+P AGE      31 31
+P AGE      32 32
+P AGE      33 33
+P AGE      34 34
+P AGE      35 35
+P AGE      36 36
+P AGE      37 37
+P AGE      38 38
+P AGE      39 39
+P AGE      40 40
+P AGE      41 41
+P AGE      42 42
+P AGE      43 43
+P AGE      44 44
+P AGE      45 45
+P AGE      46 46
+P AGE      47 47
+P AGE      48 48
+P AGE      49 49
+P AGE      50 50
+P AGE      51 51
+P AGE      52 52
+P AGE      53 53
+P AGE      54 54
+P AGE      55 55
+P AGE      56 56
+P AGE      57 57
+P AGE      58 58
+P AGE      59 59
+P AGE      60 60
+P AGE      61 61
+P AGE      62 62
+P AGE      63 63
+P AGE      64 64
+P AGE      65 65
+RECTYPE		Record type
+1		Household
+2		Person
+
+MONTH		Month
+01		January
+02		February
+03		March
+04		April
+05		May
+06		June
+07		July
+08		August
+09		September
+10		October
+11		November
+12		December
+
+METRO		Metropolitan central city status
+0		Not identifiable
+1		Not in metro area
+		In metro area
+2		Central city
+3		Outside central city
+4		Central city status unknown
+9		Missing/Unknown
+
+STATECENSUS		State (Census code)
+00		Unknown
+11		Maine
+12		New Hampshire
+13		Vermont
+14		Massachusetts
+15		Rhode Island
+16		Connecticut
+19		Maine, New Hampshire, Vermont, Rhode Island
+21		New York
+22		New Jersey
+23		Pennsylvania
+31		Ohio
+32		Indiana
+33		Illinois
+34		Michigan
+35		Wisconsin
+39		Michigan, Wisconsin
+41		Minnesota
+42		Iowa
+43		Missouri
+44		North Dakota
+45		South Dakota
+46		Nebraska
+47		Kansas
+49		Minnesota, Iowa, Missouri, North Dakota, South Dakota, Nebraska, Kansas
+50		Delaware, Maryland, Virginia, West Virginia
+51		Delaware
+52		Maryland
+53		District of Columbia
+54		Virginia
+55		West Virginia
+56		North Carolina
+57		South Carolina
+58		Georgia
+59		Florida
+60		South Carolina, Georgia
+61		Kentucky
+62		Tennessee
+63		Alabama
+64		Mississippi
+67		Kentucky, Tennessee
+69		Alabama, Mississippi
+71		Arkansas
+72		Louisiana
+73		Oklahoma
+74		Texas
+79		Arkansas, Louisiana, Oklahoma
+81		Montana
+82		Idaho
+83		Wyoming
+84		Colorado
+85		New Mexico
+86		Arizona
+87		Utah
+88		Nevada
+89		Montana, Idaho, Wyoming, Colorado, New Mexico, Arizona, Utah, Nevada
+91		Washington
+92		Oregon
+93		California
+94		Alaska
+95		Hawaii
+99		Washington, Oregon, Alaska, Hawaii
+
+AGE		Age
+00		Under 1 year
+01		1
+02		2
+03		3
+04		4
+05		5
+06		6
+07		7
+08		8
+09		9
+10		10
+11		11
+12		12
+13		13
+14		14
+15		15
+16		16
+17		17
+18		18
+19		19
+20		20
+21		21
+22		22
+23		23
+24		24
+25		25
+26		26
+27		27
+28		28
+29		29
+30		30
+31		31
+32		32
+33		33
+34		34
+35		35
+36		36
+37		37
+38		38
+39		39
+40		40
+41		41
+42		42
+43		43
+44		44
+45		45
+46		46
+47		47
+48		48
+49		49
+50		50
+51		51
+52		52
+53		53
+54		54
+55		55
+56		56
+57		57
+58		58
+59		59
+60		60
+61		61
+62		62
+63		63
+64		64
+65		65
+66		66
+67		67
+68		68
+69		69
+70		70
+71		71
+72		72
+73		73
+74		74
+75		75
+76		76
+77		77
+78		78
+79		79
+80		80
+81		81
+82		82
+83		83
+84		84
+85		85
+86		86
+87		87
+88		88
+89		89
+90		90 (90+, 1988-2002)
+91		91
+92		92
+93		93
+94		94
+95		95
+96		96
+97		97
+98		98
+99		99+
+
+SEX		Sex
+1		Male
+2		Female
+9		NIU
+
+RACE		Race
+100		White
+200		Black/Negro
+300		American Indian/Aleut/Eskimo
+650		Asian or Pacific Islander
+651		Asian only
+652		Hawaiian/Pacific Islander only
+700		Other (single) race, n.e.c.
+		Two or more races
+801		White-Black
+802		White-American Indian
+803		White-Asian
+804		White-Hawaiian/Pacific Islander
+805		Black-American Indian
+806		Black-Asian
+807		Black-Hawaiian/Pacific Islander
+808		American Indian-Asian
+809		Asian-Hawaiian/Pacific Islander
+810		White-Black-American Indian
+811		White-Black-Asian
+812		White-American Indian-Asian
+813		White-Asian-Hawaiian/Pacific Islander
+814		White-Black-American Indian-Asian
+815		American Indian-Hawaiian/Pacific Islander
+816		White-Black--Hawaiian/Pacific Islander
+817		White-American Indian-Hawaiian/Pacific Islander
+818		Black-American Indian-Asian
+819		White-American Indian-Asian-Hawaiian/Pacific Islander
+820		Two or three races, unspecified
+830		Four or five races, unspecified
+999		Blank
+
+MARST		Marital status
+1		Married, spouse present
+2		Married, spouse absent
+3		Separated
+4		Divorced
+5		Widowed
+6		Never married/single
+7		Widowed or Divorced
+9		NIU
+
+HISPAN		Hispanic origin
+000		Not Hispanic
+100		Mexican
+102		Mexican American
+103		Mexicano/Mexicana
+104		Chicano/Chicana
+108		Mexican (Mexicano)
+109		Mexicano/Chicano
+200		Puerto Rican
+300		Cuban
+400		Dominican
+500		Salvadoran
+		Other Spanish:
+600		Other Hispanic
+610		Central/South American
+611		Central American, (excluding Salvadoran)
+612		South American
+901		Do not know
+902		N/A (and no response 1985-87)
+
+EMPSTAT		Employment status
+00		NIU
+01		Armed Forces
+		In Labor Force
+		Employed
+10		At work
+12		Has job, not at work last week
+20		Unemployed
+21		Unemployed, experienced worker
+22		Unemployed, new worker
+30		Not in labor force
+31		NILF, housework
+32		NILF, unable to work
+33		NILF, school
+34		NILF, other
+35		NILF, unpaid, lt 15 hours
+36		NILF, retired
+
+EDUC		Educational attainment recode
+000		NIU or no schooling
+001		NIU or blank
+002		None or preschool
+010		Grades 1, 2, 3, or 4
+011		Grade 1
+012		Grade 2
+013		Grade 3
+014		Grade 4
+020		Grades 5 or 6
+021		Grade 5
+022		Grade 6
+030		Grades 7 or 8
+031		Grade 7
+032		Grade 8
+040		Grade 9
+050		Grade 10
+060		Grade 11
+070		Grade 12
+071		12th grade, no diploma
+072		12th grade, diploma unclear
+073		High school diploma or equivalent
+080		1 year of college
+081		Some college but no degree
+090		2 years of college
+091		Associate's degree, occupational/vocational program
+092		Associate's degree, academic program
+100		3 years of college
+110		4 years of college
+111		Bachelor's degree
+120		5+ years of college
+121		5 years of college
+122		6+ years of college
+123		Master's degree
+124		Professional school degree
+125		Doctorate degree
+999		Missing/Unknown
+
+UNION		Union membership
+0		NIU
+1		No union coverage
+2		Member of labor union
+3		Covered by union but not a member

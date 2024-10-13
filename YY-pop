@@ -1,0 +1,12 @@
+#!/usr/bin/fish
+
+if test (count $argv) -lt 2 -o (count $argv) -gt 3
+    echo "usage: DQ_SERVER COMPUTE_HOST [ N_THREADS ]" >&2
+    exit 1
+end
+
+set server $argv[1]
+set host $argv[2]
+set n_threads $argv[3]
+
+ssh -n -f $host "fish -c 'cd docs/devel/gourd-misc/education; dq --server $server pop $n_threads > /dev/null 2>&1 &; disown'"

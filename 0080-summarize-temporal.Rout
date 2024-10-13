@@ -1,0 +1,276 @@
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/env Rscript
+> 
+> library(salso)  # Requires version 0.3.38 or higher.
+> # library(tikzDevice)
+> library(coda)
+
+Attaching package: ‘coda’
+
+The following object is masked _by_ ‘.GlobalEnv’:
+
+    thin
+
+> library(MASS)
+> library(fields)
+Loading required package: spam
+Spam version 2.10-0 (2023-10-23) is loaded.
+Type 'help( Spam)' or 'demo( spam)' for a short introduction 
+and overview of this package.
+Help for individual functions is also obtained by adding the
+suffix '.spam' to the function name, e.g. 'help( chol.spam)'.
+
+Attaching package: ‘spam’
+
+The following objects are masked from ‘package:base’:
+
+    backsolve, forwardsolve
+
+Loading required package: viridisLite
+
+Try help(fields) to get started.
+> 
+> source("XX-common.R")
+> 
+> rep <- 1:10
+> 
+> log_likelihood_samples <- function(rep, prefix) {
++   lapply(rep, \(rep) {
++     files <- system2("fd", c("-I", "-g", "'*.rds'", sprintf(prefix, rep)), stdout = TRUE)
++     results <- lapply(files, readRDS)
++     log_likelihood_list <- lapply(results, \(x) x$fit$log_likelihood)
++     apply(Reduce(cbind, log_likelihood_list), 1, sum)
++   })
++ }
+> 
+> doit <- function(log_likelihood) {
++   n_eff <- effectiveSize(log_likelihood)
++   # Log-Likelihood (from k-fold cross validation)
++   me <- qnorm(0.975) * sqrt(var(log_likelihood) / n_eff)
++   x <- c(mean(log_likelihood) + c(-1, 0, 1) * me, me)
++   names(x) <- c("Lower", "Mean", "Upper", "Margin of Error")
++   # print(x)
++   x[2]
++ }
+> 
+> 
+> for (drop in c("race", "married", "none")) {
++ 
++   cat("\n\nOmitted variable(s): ", drop, "\n\n\n")
++ 
++   prefix <- paste0("out/out-of-sample-temporal-0.0000-REP%s/55000-5000-10/5-1-TRUE-1-1-TRUE-TRUE-", drop)
++ 
++   hosts <- lapply(rep, \(rep) {
++     files <- system2("fd", c("-I", "-g", "'*.rds'", sprintf(prefix, rep)), stdout = TRUE)
++     lapply(files, \(x) readRDS(x)$host)
++   })
++   print(hosts |> unlist() |> table())
++ 
++   totals <- sapply(rep, \(i) doit(log_likelihood_samples(rep, prefix)[[i]]))
++   options(scipen = 9, digits = 16)
++   print(mean(totals))
++   totals <- transform(totals)
++   print(t.test(totals))
++ 
++ }
+
+
+Omitted variable(s):  race 
+
+
+
+bryce.byu.edu  dunn.byu.edu wahba.byu.edu 
+           20            40            40 
+[1] -55450.68245329664
+
+	One Sample t-test
+
+data:  totals
+t = -96.644888448799, df = 9, p-value = 6.895244977827e-15
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ -1822.100470716004 -1738.751956852703
+sample estimates:
+         mean of x 
+-1780.426213784353 
+
+
+
+Omitted variable(s):  married 
+
+
+
+bryce.byu.edu  dunn.byu.edu wahba.byu.edu 
+           20            40            40 
+[1] -55059.07751901467
+
+	One Sample t-test
+
+data:  totals
+t = 38.984962232862, df = 9, p-value = 0.00000000002389496933319
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+  966.1552542085074 1085.1872848234341
+sample estimates:
+        mean of x 
+1025.671269515971 
+
+
+
+Omitted variable(s):  none 
+
+
+
+bryce.byu.edu  dunn.byu.edu wahba.byu.edu 
+           20            48            32 
+[1] -54504.41563523241
+
+	One Sample t-test
+
+data:  totals
+t = 178.13545898797, df = 9, p-value < 2.2204460493e-16
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 4936.677468391282 5063.672756245119
+sample estimates:
+      mean of x 
+5000.1751123182 
+
+> 
+> files <- system2("fd", c("-I", "-g", "'*.rds'", sprintf(prefix, rep)), stdout = TRUE)
+> all <- lapply(files, readRDS)
+> 
+> ## Permutation acceptance rate per attempt
+> p <- mean(sapply(all, \(a) a$fit$permutation_acceptance_rate))
+> p
+[1] 0.1504728918518519
+> 
+> 
+> drop <- "none"
+> 
+> for (discard_proportion in c("0.1000", "0.2000", "0.3000", "0.4000", "0.5000")) {
++ 
++   cat("\n\nDiscard proportion: ", discard_proportion, "\n\n\n")
++ 
++   prefix <- paste0("out/out-of-sample-temporal-", discard_proportion, "-REP%s/55000-5000-10/5-1-TRUE-1-1-TRUE-TRUE-", drop)
++ 
++   totals <- sapply(rep, \(i) doit(log_likelihood_samples(rep, prefix)[[i]]))
++   options(scipen = 9, digits = 16)
++   print(mean(totals))
++   totals <- transform(totals)
++   print(t.test(totals))
++ 
++ }
+
+
+Discard proportion:  0.1000 
+
+
+[1] -54601.1290668698
+
+	One Sample t-test
+
+data:  totals
+t = 129.11657683257, df = 9, p-value = 5.094175634896e-16
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 4231.699456285345 4382.624733635007
+sample estimates:
+        mean of x 
+4307.162094960177 
+
+
+
+Discard proportion:  0.2000 
+
+
+[1] -54710.94387029456
+
+	One Sample t-test
+
+data:  totals
+t = 58.246161984635, df = 9, p-value = 0.0000000000006527667180277
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 3383.549662406964 3656.989232471870
+sample estimates:
+        mean of x 
+3520.269447439417 
+
+
+
+Discard proportion:  0.3000 
+
+
+[1] -54863.62583517452
+
+	One Sample t-test
+
+data:  totals
+t = 33.745929997866, df = 9, p-value = 0.00000000008687432744316
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 2263.565768949657 2588.847084154092
+sample estimates:
+        mean of x 
+2426.206426551875 
+
+
+
+Discard proportion:  0.4000 
+
+
+[1] -55038.16105346455
+
+	One Sample t-test
+
+data:  totals
+t = 15.492126615707, df = 9, p-value = 0.00000008520209852639
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ 1003.897281735666 1347.204714859429
+sample estimates:
+        mean of x 
+1175.550998297548 
+
+
+
+Discard proportion:  0.5000 
+
+
+[1] -55349.22068301141
+
+	One Sample t-test
+
+data:  totals
+t = -8.6326825436009, df = 9, p-value = 0.00001199033024706
+alternative hypothesis: true mean is not equal to 0
+95 percent confidence interval:
+ -1329.4242050274361  -777.3524777061549
+sample estimates:
+         mean of x 
+-1053.388341366795 
+
+> 
+> 
+> proc.time()
+              user             system            elapsed 
+963.25699999999995  83.90000000000001 342.88900000000001 

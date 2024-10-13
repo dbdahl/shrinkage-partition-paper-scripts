@@ -1,0 +1,207 @@
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/env Rscript
+> 
+> library(txtplot)
+> 
+> extract <- function(files) {
++   data <- lapply(files, \(y) readRDS(y))
++   host <- sapply(data, \(y) y$host)
++   time <- sapply(data, \(y) y$time[['elapsed']])
++   size <- as.integer(sub(".*-mega-([0-9]+).*", "\\1", files))
++   n_clusters <- sapply(data, \(data) mean(apply(data$fit$samples$clustering, 1, \(x) length(unique(x)))))
++   list(host = host, time = time, size = size, n_clusters)
++ }
+> 
+> files <- system2("fd",c("-I","-p","'out/in-sample/mega-.*/55000-5000-10/crp-1-regions-mega-.*-0-0.0000/.*/NA.rds'"), stdout = TRUE)
+> crp <- extract(files)
+> 
+> files <- system2("fd",c("-I","-p","'out/in-sample/mega-.*/55000-5000-10/sp_crp-0.02-regions-mega-.*-5-0.0000/.*/NA.rds'"), stdout = TRUE)
+> sp <- extract(files)
+> 
+> table(crp$host)
+
+dunn.byu.edu 
+          27 
+> table(sp$host)
+
+dunn.byu.edu 
+          27 
+> 
+> with(crp, txtplot(size, time))
+     ++---------+---------+---------+---------+---------+------+
+     |                                                    *    |
+     |                                                * *   *  |
+1500 +                                      *     * *          +
+     |                                    *   * *              |
+     |                                  *                      |
+     |                          *   * *                        |
+1000 +                            *                            +
+     |                    * * *                                |
+     |                *                                        |
+ 500 +                  *                                      +
+     |          *   *                                          |
+     |      *     *                                            |
+     |  * *   *                                                |
+   0 ++---------+---------+---------+---------+---------+------+
+      0         5        10        15        20        25       
+> with(sp, txtplot(size, time))
+      ++---------+--------+---------+---------+---------+------+
+1e+05 +                                                   * *  +
+      |                                                 *      |
+80000 +                                               *        +
+      |                                           * *          |
+      |                                                        |
+60000 +                                       * *              +
+      |                                     *                  |
+40000 +                                   *                    +
+      |                             * * *                      |
+      |                         * *                            |
+20000 +                     * *                                +
+      |                ** *                                    |
+    0 +  * * * * * * *                                         +
+      ++---------+--------+---------+---------+---------+------+
+       0         5       10        15        20        25       
+> 
+> both <- merge(as.data.frame(crp), as.data.frame(sp), by = "size")[, c(1,3,4,6,7)]
+> names(both) <- c("size","crp_time","crp_n_clusters","sp_time","sp_n_clusters")
+> both$ratio <- both$sp_time / both$crp_time
+> both$crp_time_in_hours <- both$crp_time / 60^2
+> both$sp_time_in_hours <- both$sp_time / 60^2
+> both
+   size crp_time crp_n_clusters    sp_time sp_n_clusters     ratio
+1     1   55.956         5.5418     68.986        4.1438  1.232862
+2     2   84.030         6.5740    309.849        4.7934  3.687362
+3     3  190.629         6.7718    693.804        5.1778  3.639551
+4     4  173.036         6.6210   1254.826        5.3728  7.251820
+5     5  331.992         6.9544   2532.149        6.9542  7.627139
+6     6  303.741         8.0736   4224.519        8.2386 13.908294
+7     7  418.234         8.6044   6141.817        8.9728 14.685121
+8     8  629.096         9.6500   8372.440        9.9966 13.308684
+9     9  550.928        10.3464  11372.844       10.8760 20.643068
+10   10  890.956        10.6870  13793.849       10.9400 15.482077
+11   11  774.019        10.9090  16711.850       11.2472 21.591007
+12   12  888.841        11.0606  20116.644       11.4122 22.632444
+13   13 1055.016        11.3230  22880.993       11.3120 21.687816
+14   14  954.843        11.5190  26202.974       11.3210 27.442181
+15   15 1063.336        12.1508  31571.340       11.7374 29.690841
+16   16 1122.910        12.6994  35117.621       11.5982 31.273763
+17   17 1202.506        12.6018  38248.509       11.3248 31.807333
+18   18 1447.712        12.8126  43025.797       11.3626 29.719859
+19   19 1482.616        13.1122  48475.562       11.6444 32.695966
+20   20 1439.387        13.4124  55746.178       11.8674 38.729110
+21   21 1451.649        13.5978  61387.850       11.8172 42.288356
+22   22 1514.204        13.6942  70653.942       11.9898 46.660782
+23   23 1533.511        13.6426  76569.111       11.9984 49.930591
+24   24 1709.705        13.6814  78898.382       11.6064 46.147366
+25   25 1694.720        13.9880  86701.039       11.6926 51.159507
+26   26 1886.841        14.0900  95617.842       11.8350 50.676152
+27   27 1760.513        13.9418 100632.104       11.7716 57.160671
+   crp_time_in_hours sp_time_in_hours
+1         0.01554333       0.01916278
+2         0.02334167       0.08606917
+3         0.05295250       0.19272333
+4         0.04806556       0.34856278
+5         0.09222000       0.70337472
+6         0.08437250       1.17347750
+7         0.11617611       1.70606028
+8         0.17474889       2.32567778
+9         0.15303556       3.15912333
+10        0.24748778       3.83162472
+11        0.21500528       4.64218056
+12        0.24690028       5.58795667
+13        0.29306000       6.35583139
+14        0.26523417       7.27860389
+15        0.29537111       8.76981667
+16        0.31191944       9.75489472
+17        0.33402944      10.62458583
+18        0.40214222      11.95161028
+19        0.41183778      13.46543389
+20        0.39982972      15.48504944
+21        0.40323583      17.05218056
+22        0.42061222      19.62609500
+23        0.42597528      21.26919750
+24        0.47491806      21.91621722
+25        0.47075556      24.08362194
+26        0.52412250      26.56051167
+27        0.48903139      27.95336222
+> 
+> both$n <- 51*both$size
+> 
+> plot(both$n, both$sp_time, type = "l")
+> lines(both$n, both$crp_time)
+> 
+> plot(both$n, log(both$sp_time), type = "l")
+> lines(both$n, log(both$crp_time))
+> 
+> plot(both$n, sqrt(both$sp_time), type = "l")
+> lines(both$n, sqrt(both$crp_time))
+> 
+> fm <- lm(sqrt(crp_time) ~ n, data = both)
+> summary(fm)
+
+Call:
+lm(formula = sqrt(crp_time) ~ n, data = both)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-5.1140 -1.7534  0.4018  1.9471  5.4993 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 11.288205   1.124080   10.04 2.95e-10 ***
+n            0.025610   0.001376   18.62 3.65e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.84 on 25 degrees of freedom
+Multiple R-squared:  0.9327,	Adjusted R-squared:   0.93 
+F-statistic: 346.5 on 1 and 25 DF,  p-value: 3.646e-16
+
+> hat <- predict(fm)
+> lines(both$n, hat)
+> 
+> fm <- lm(sqrt(sp_time) ~ n, data = both)
+> summary(fm)
+
+Call:
+lm(formula = sqrt(sp_time) ~ n, data = both)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-6.2020 -3.1981  0.2721  2.7288  5.9336 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)    
+(Intercept) -6.874275   1.253388  -5.485 1.07e-05 ***
+n            0.237744   0.001534 154.981  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.166 on 25 degrees of freedom
+Multiple R-squared:  0.999,	Adjusted R-squared:  0.9989 
+F-statistic: 2.402e+04 on 1 and 25 DF,  p-value: < 2.2e-16
+
+> hat <- predict(fm)
+> lines(both$n, hat)
+> 
+> proc.time()
+   user  system elapsed 
+  6.920   3.652  10.322 

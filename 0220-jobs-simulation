@@ -1,0 +1,49 @@
+#!/usr/bin/fish
+
+./XX-mcmc-tuning.R fish | source
+
+set DATASETS (fd -g 'd2-sim-*' data-clean)
+
+# set N_ITERATIONS 55
+# set BURNIN 5
+# set THIN 1
+
+for DATASET in $DATASETS
+    echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN jl random 1 regions 0 0.0000 NA 1 TRUE
+    for anchor in regions
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 4_1 0.0000 NA 1 TRUE
+        for shrinkage in 7.10 4.03
+            echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN lsp random 1 $anchor {$shrinkage}_1 0.0000 NA 1 TRUE
+        end
+        for shrinkage in 18.14 12.43
+            echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN cpp_jl_vi random 1 $anchor $shrinkage 0.0000 NA 1 TRUE
+        end
+        for shrinkage in 202.54 198.94
+            echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN cpp_jl_binder random 1 $anchor $shrinkage 0.0000 NA 1 TRUE
+        end
+    end
+    for anchor in chaos
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 4_1 0.0000 NA 1 TRUE
+        for shrinkage in 7.10 4.04
+            echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN lsp random 1 $anchor {$shrinkage}_1 0.0000 NA 1 TRUE
+        end
+        for shrinkage in 23.32 18.10
+            echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN cpp_jl_vi random 1 $anchor $shrinkage 0.0000 NA 1 TRUE
+        end
+        for shrinkage in 261.2 262.4
+            echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN cpp_jl_binder random 1 $anchor $shrinkage 0.0000 NA 1 TRUE
+        end
+    end
+end
+
+for DATASET in $DATASETS
+    for anchor in regions chaos
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 0.0 0.0000 NA 1 TRUE
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 1.0 0.0000 NA 1 TRUE
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 2.0 0.0000 NA 1 TRUE
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 3.0 0.0000 NA 1 TRUE
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 4.0 0.0000 NA 1 TRUE
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 5.0 0.0000 NA 1 TRUE
+        echo ./XX-mcmc.R $DATASET $N_ITERATIONS $BURNIN $THIN sp_jl random 2_2 $anchor 6.0 0.0000 NA 1 TRUE
+    end
+end

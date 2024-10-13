@@ -1,0 +1,343 @@
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/env Rscript
+> 
+> library(fields)
+Loading required package: spam
+Spam version 2.10-0 (2023-10-23) is loaded.
+Type 'help( Spam)' or 'demo( spam)' for a short introduction 
+and overview of this package.
+Help for individual functions is also obtained by adding the
+suffix '.spam' to the function name, e.g. 'help( chol.spam)'.
+
+Attaching package: ‘spam’
+
+The following objects are masked from ‘package:base’:
+
+    backsolve, forwardsolve
+
+Loading required package: viridisLite
+
+Try help(fields) to get started.
+> library(MASS)
+> library(gourd)
+> library(salso)  # Requires version 0.3.38 or higher.
+> # library(tikzDevice)
+> 
+> for (model in c("hierarchical", "temporal")) {
++   for (years in c("1994-2002", "1994-2011", "1994-2020", "1994-2020-2011", "1994-2020-2002", "1994-2020-1994")) {
++     files <- system2("fd",c("-I","-g","'*.rds'",paste0("out/in-sample-", model, "-", years)), stdout = TRUE)
++     files <- files[grepl(".*/[1-5].rds", files)] ## Only take the first 5 for consistency
++     files |> sapply(\(x) readRDS(x)$time[['user.self']]) |> mean() |> print()
++     files |> sapply(\(x) readRDS(x)$host) |> table() |> print()
++     time <- files |> sapply(\(x) readRDS(x)$time[['elapsed']]) |> mean() # Use this one... but should be similar to above.
++     cat(paste0("Years: ", years, "; Model: ", model, "; Mean time: ", time, "\n"))
++   }
++ }
+[1] 2794.68
+
+dunn.byu.edu 
+           5 
+Years: 1994-2002; Model: hierarchical; Mean time: 2849.4998
+[1] 4962.762
+
+dunn.byu.edu 
+           5 
+Years: 1994-2011; Model: hierarchical; Mean time: 5033.6478
+[1] 6130.184
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020; Model: hierarchical; Mean time: 6204.035
+[1] 7975.301
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020-2011; Model: hierarchical; Mean time: 8064.2058
+[1] 8956.772
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020-2002; Model: hierarchical; Mean time: 9043.2454
+[1] 10318.21
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020-1994; Model: hierarchical; Mean time: 10407.954
+[1] 4094.575
+
+dunn.byu.edu 
+           5 
+Years: 1994-2002; Model: temporal; Mean time: 4112.166
+[1] 7843.628
+
+dunn.byu.edu 
+           5 
+Years: 1994-2011; Model: temporal; Mean time: 7876.0462
+[1] 9844.06
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020; Model: temporal; Mean time: 9884.4194
+[1] 11796.83
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020-2011; Model: temporal; Mean time: 11847.2162
+[1] 13471.26
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020-2002; Model: temporal; Mean time: 13540.3592
+[1] 15337.06
+
+dunn.byu.edu 
+           5 
+Years: 1994-2020-1994; Model: temporal; Mean time: 15425.4126
+> 
+> # How time is apportioned
+> model <- "hierarchical"
+> years <- "1994-2020"
+> files <- system2("fd",c("-I","-g","'*.rds'",paste0("out/in-sample-", model, "-", years)), stdout = TRUE)
+> files <- files[grepl(".*/[1-5].rds", files)] ## Only take the first 5 for consistency
+> y <- apply(Reduce(rbind, lapply(files, \(x) readRDS(x)$fit$wall_time)), 2, mean)
+> y / sum(y)
+      units      anchor permutation   shrinkage        grit 
+ 0.39945322  0.52234412  0.05137582  0.01400073  0.01282611 
+> 
+> # How time is apportioned
+> model <- "temporal"
+> years <- "1994-2020"
+> files <- system2("fd",c("-I","-g","'*.rds'",paste0("out/in-sample-", model, "-", years)), stdout = TRUE)
+> files <- files[grepl(".*/[1-5].rds", files)] ## Only take the first 5 for consistency
+> y <- apply(Reduce(rbind, lapply(files, \(x) readRDS(x)$fit$wall_time)), 2, mean)
+> y / sum(y)
+      units      anchor permutation   shrinkage        grit 
+ 0.95533217  0.00000000  0.01970883  0.01338601  0.01157298 
+> 
+> year <- "2020"
+> image_directory <- "out-images"
+> dir.create(image_directory, showWarnings = FALSE)
+> 
+> 
+> ## Hierarchical visualizations
+> model <- "hierarchical"
+> files <- system2("fd",c("-I","-g","'*.rds'",paste0("out/in-sample-", model, "-1994-", year)), stdout = TRUE)
+> x <- Reduce(rbind, lapply(files, \(x) t(readRDS(x)$fit$anchor)))
+> est <- salso(x)
+> est
+ [1] 1 2 2 2 2 2 3 3 1 1 1 3 3 3 2 1 1 4 4 1 1 2 2 2 1 4 1 4 1 1 4 4 4 4 4 1 4 1
+[39] 4 1 5 2 1 2 6 3 2 2 2 7 2
+attr(,"info")
+ loss a maxNClusters expectedLoss initMethod nScans nZAcc nZAtt nRuns  seconds
+   VI 1           15     1.274397     sample      5     1     3   128 24.21248
+> table(est)
+est
+ 1  2  3  4  5  6  7 
+16 15  6 11  1  1  1 
+> summ <- summary(est)
+> # tikz(file.path(image_directory, "anchor.tex"), width = 6, height = 6)
+> png(file.path(image_directory, "anchor.png"), width = 1200, height = 1200, pointsize = 48)
+> par(family = "serif")
+> plot(summ, showLabels = TRUE, cexAdjustment = 0.5)
+> dev.off()
+null device 
+          1 
+> 
+> 
+> ## Temporal visualizations
+> model <- "temporal"
+> source("./XX-common.R")
+> map <- map()
+> source("./XX-mcmc-tuning.R", echo = TRUE)
+
+> .before <- ls()
+
+> N_ITERATIONS <- 55000
+
+> BURNIN <- 5000
+
+> THIN <- 10
+
+> n_replicates <- 10
+
+> n_items <- 51
+
+> years <- 1994:2020
+
+> .after <- ls()
+
+> .new <- setdiff(.after, c(".before", .before))
+
+> args <- commandArgs(TRUE)
+
+> if (length(args) == 1 && args[1] == "fish") {
++     for (.x in .new) {
++         .value <- paste0(eval(parse(text = .x)), collapse = " ")
++          .... [TRUNCATED] 
+> 
+> files <- system2("fd",c("-I","-g","'*.rds'",paste0("out/in-sample-", model, "-1994-", year)), stdout = TRUE)
+> samples <- lapply(files, \(x) readRDS(x)$fit$unit_partitions |> lapply(\(y) t(y)))
+> samples <- lapply(seq_along(years), \(t) Reduce(rbind, lapply(samples, \(x) x[[t]])))
+> 
+> samples_crp <- lapply(years, \(year) {
++   dir <- sprintf("out/in-sample/%s/%s-%s-%s/crp-1-regions-0-0.0000", year, N_ITERATIONS, BURNIN, THIN)
++   readRDS(sprintf("%s/1/NA.rds", dir))$fit$samples$clustering
++   #dir <- sprintf("out/%s/%s-%s-%s/crp-1-regions-0-0.0000", year, N_ITERATIONS, BURNIN, THIN)
++   #Reduce(rbind, lapply(lapply(seq_len(n_replicates), \(i) readRDS(sprintf("%s/%s_%s/NA.rds", dir, i, n_replicates))), \(x) x$fit$samples$clustering))
++ })
+> 
+> nRuns <- 16
+> estimates_all <- lapply(samples, \(x) salso(x, nRuns = nRuns))
+> estimates <- Reduce(rbind, estimates_all)
+> 
+> estimates_crp_all <- lapply(samples_crp, \(x) salso(x, nRuns = nRuns))
+> estimates_crp <- Reduce(rbind, estimates_crp_all)
+> 
+> colors <- hcl.colors(5, "YlOrRd", rev = TRUE)[c(1,5,3,2,4)]
+> partition_over_time_plot <-  function(x) {
++   # par(mar = c(2.2, 0.1, 0.1, 0.63))  
++   par(mar = c(2.2, 0.2, 0.1, 0.2))
++   swap <- function(x, i, j) {
++     x[x==i] <- -1
++     x[x==j] <- i
++     x[x==-1] <- j
++     x
++   }
++   x[2,] <- swap(x[2,], 4, 5)
++   x[7,] <- swap(x[7,], 3, 4)
++   x[8,] <- swap(x[8,], 3, 4)
++   x[8,] <- swap(x[8,], 4, 5)
++   x[10,] <- swap(x[10,], 3, 4)
++   x[10,] <- swap(x[10,], 4, 5)
++   x[18,] <- swap(x[18,], 3, 4)
++   image(x, col = colors, axes = FALSE)
++   box()
++   grid <- \(len) seq(0, 1, length = len) + 0.5 / len
++   abline(v = grid(27))
++   abline(h = grid(51))
++   axis(1, at = c(1, 6, 11, 16, 21) / 26, label = c(1995, 2000, 2005, 2010, 2015), las = 1)
++ }
+> 
+> # tikz(file.path(image_directory, "partitions_over_time.tex"), width = 8, height = 3)
+> png(file.path(image_directory, "partitions_over_time.png"), width = 1600, height = 600,pointsize = 48)
+> layout(matrix(c(1, 2), nrow = 1, ncol = 2, byrow = TRUE))
+> partition_over_time_plot(estimates_crp)
+> partition_over_time_plot(estimates)
+> dev.off()
+null device 
+          1 
+> 
+> 
+> pseudo_correlation_plot <- function(filename, samples, loss = RI, max_minus = FALSE, n = 1000) {
++   n_years <- length(years)
++   lm <- matrix(0.0, nrow = n_years, ncol = n_years)
++   for (i in seq_len(n_years)) {
++     for (j in seq(i, n_years)) {
++       ni <- nrow(samples[[i]])
++       nj <- nrow(samples[[j]])
++       lm[i, j] <- mean(loss(samples[[i]][sample(ni, n), ], samples[[j]][sample(nj, n), ]))
++     }
++   }
++   lm2 <- t(lm) + lm - diag(diag(lm))   # Symmetrize
++   lm4 <- if (max_minus) {
++     lm3 <- max(lm2) - lm2 # Loss to pseudo covariance
++     cov2cor(lm3)                  # Pseudo covariance to pseudo correlation
++   } else {
++     lm2
++   }
++   # tikz(filename, width = 6, height = 6)
++   png(filename, width = 1200, height = 1200, pointsize = 48)
++   par(mar = c(2.2, 3.1, 0.1, 0.6), family = "serif")
++   image(lm4[, rev(seq_len(nrow(lm4)))], axes = FALSE)
++   box()
++   axis(1, at = c(1, 6, 11, 16, 21, 26) / 26, label = c(1995, 2000, 2005, 2010, 2015, 2020), las = 1)
++   axis(2, at = c(0, 5, 10, 15, 20, 25) / 26, label = rev(c(1995, 2000, 2005, 2010, 2015, 2020)), las = 1)
++   dev.off()
++ }
+> 
+> n_samples <- 500
+> pseudo_correlation_plot(file.path(image_directory, "ri_matrix_sp.png"), samples, n = n_samples, loss = RI)
+null device 
+          1 
+> pseudo_correlation_plot(file.path(image_directory, "ri_matrix_crp.png"), samples_crp, n = n_samples, loss = RI)
+null device 
+          1 
+> 
+> 
+> ## Shrinkage and grit
+> anchor <- as.integer(scan("anchors/regions.txt"))
+Read 51 items
+> 
+> for (model in c("hierarchical", "temporal")) {
++   files <- system2("fd",c("-I","-g","'*.rds'",paste0("out/in-sample-", model, "-1994-", year)), stdout = TRUE)
++   
++   all_shrinkages <- Reduce(c, lapply(files, \(x) readRDS(x)$fit$shrinkage))
++   shrinkage_alpha <- 5
++   shrinkage_beta <- 1
++   cat("Prior mean: ", shrinkage_alpha / shrinkage_beta, "\n", sep = "")
++   cat("Posterior mean: ", mean(all_shrinkages), "\n", sep = "")
++   
++   all_grits <- Reduce(c, lapply(files, \(x) readRDS(x)$fit$grit))
++   grit_alpha <- 1
++   grit_beta <- 1
++   cat("Prior mean: ", grit_alpha / (grit_alpha + grit_beta), "\n", sep = "")
++   cat("Posterior mean: ", mean(all_grits), "\n", sep = "")
++   
++   kde <- kde2d(all_shrinkages, all_grits, n = 100)
++ 
++   set.seed(34534512)
++   out <- summarize_prior_on_shrinkage_and_grit(anchor, n_mc_samples = 1000, shrinkage_n = 100, shrinkage_shape = shrinkage_alpha, shrinkage_rate = shrinkage_beta, grit_n = 100, grit_shape1 = grit_alpha, grit_shape2 = grit_beta, domain_specification = list(shrinkage_lim = c(0, 10), grit_lim = c(0.0, 1.0)))
++   
++   png(file.path(image_directory, sprintf("shrinkage_grit_rand_%s.png", model)), width = 1200, height = 1200, pointsize = 48)
++   par(mar = c(4, 4, 0.2, 2) + 0.1, las = 1, family = "serif")
++   image.plot(out$shrinkage, out$grit, out$expected_rand_index, xlab = "Shrinkage", ylab = "Grit", legend.width = 0.7, legend.mar = 3.1)
++   # image(out$shrinkage, out$grit, out$expected_rand_index, xlab = "Shrinkage", ylab = "Grit")
++   contour(out$shrinkage, out$grit, exp(out$log_density), add = TRUE, labcex = 1.4, lwd = 6, lty = 3, drawlabels = FALSE)
++   contour(kde, add = TRUE, lwd = 6, lty = 1, drawlabels = FALSE)
++   dev.off()
++   
++   png(file.path(image_directory, sprintf("shrinkage_grit_entropy_%s.png", model)), width = 1200, height = 1200, pointsize = 48)
++   par(mar = c(4, 4, 0.2, 2) + 0.1, las = 1, family = "serif")
++   image.plot(out$shrinkage, out$grit, out$expected_entropy, xlab = "Shrinkage", ylab = "Grit", legend.width = 0.7, legend.mar = 3.1)
++   # image(out$shrinkage, out$grit, out$expected_entropy, xlab = "Shrinkage", ylab = "Grit")
++   contour(out$shrinkage, out$grit, exp(out$log_density), add = TRUE, labcex = 1.6, lwd = 6, lty = 3, drawlabels = FALSE)
++   contour(kde, add = TRUE, lwd = 6, lty = 1, drawlabels = FALSE)
++   dev.off()
++ }
+Prior mean: 5
+Posterior mean: 4.628219
+Prior mean: 0.5
+Posterior mean: 0.1866925
+Prior mean: 5
+Posterior mean: 4.885276
+Prior mean: 0.5
+Posterior mean: 0.3870771
+> 
+> 
+> system2("cp", c(file.path(image_directory, "*"), "../../focal-paper-overleaf/img"))
+> 
+> 
+> 
+> 
+> 
+> proc.time()
+     user    system   elapsed 
+33159.957  5620.173   557.933 

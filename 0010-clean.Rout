@@ -1,0 +1,909 @@
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> #!/usr/bin/env Rscript
+> 
+> library("ipumsr")
+> sessionInfo()
+R version 4.4.1 (2024-06-14)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.5 LTS
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/libmkl_rt.so;  LAPACK version 3.8.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Denver
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ipumsr_0.8.1
+
+loaded via a namespace (and not attached):
+ [1] gourd_0.2.13     utf8_1.2.4       salso_0.3.38     R6_2.5.1        
+ [5] tidyselect_1.2.1 tzdb_0.4.0       magrittr_2.0.3   glue_1.7.0      
+ [9] tibble_3.2.1     pkgconfig_2.0.3  dplyr_1.1.4      generics_0.1.3  
+[13] readr_2.1.5      lifecycle_1.0.4  cli_3.6.3        fansi_1.0.6     
+[17] vctrs_0.6.5      zeallot_0.1.0    compiler_4.4.1   forcats_1.0.0   
+[21] haven_2.5.4      hms_1.1.3        pillar_1.9.0     rlang_1.1.4     
+> 
+> dir.create("data-clean", showWarnings = FALSE)
+> setwd("data-raw")
+> raw <- read_ipums_micro(read_ipums_ddi("cps_00001.xml"))
+Use of data from IPUMS CPS is subject to conditions including that users should cite the data appropriately. Use command `ipums_conditions()` for more details.
+> 
+> `%notin%` <- Negate(`%in%`)
+> tails <- function(x) {
++   p <- c(0, 0.001, 0.002, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.25)
++   quantile(x, probs = c(p, 0.5, 1 - rev(p)))
++ }
+> 
+> ###################
+> ## Data cleaning ##
+> ###################
+> d <- raw
+> d <- d[d$YEAR >= 1994, ] # According to the codebook, UHRSWORKORG is messed up until 1994.
+> dim(d)
+[1] 2158294      14
+> 
+> # Location
+> head(d$STATECENSUS)
+<labelled<integer>[6]>: State (Census code)
+[1] 63 63 63 63 63 63
+
+Labels:
+ value                                                                   label
+     0                                                                 Unknown
+    11                                                                   Maine
+    12                                                           New Hampshire
+    13                                                                 Vermont
+    14                                                           Massachusetts
+    15                                                            Rhode Island
+    16                                                             Connecticut
+    19                             Maine, New Hampshire, Vermont, Rhode Island
+    21                                                                New York
+    22                                                              New Jersey
+    23                                                            Pennsylvania
+    31                                                                    Ohio
+    32                                                                 Indiana
+    33                                                                Illinois
+    34                                                                Michigan
+    35                                                               Wisconsin
+    39                                                     Michigan, Wisconsin
+    41                                                               Minnesota
+    42                                                                    Iowa
+    43                                                                Missouri
+    44                                                            North Dakota
+    45                                                            South Dakota
+    46                                                                Nebraska
+    47                                                                  Kansas
+    49 Minnesota, Iowa, Missouri, North Dakota, South Dakota, Nebraska, Kansas
+    50                             Delaware, Maryland, Virginia, West Virginia
+    51                                                                Delaware
+    52                                                                Maryland
+    53                                                    District of Columbia
+    54                                                                Virginia
+    55                                                           West Virginia
+    56                                                          North Carolina
+    57                                                          South Carolina
+    58                                                                 Georgia
+    59                                                                 Florida
+    60                                                 South Carolina, Georgia
+    61                                                                Kentucky
+    62                                                               Tennessee
+    63                                                                 Alabama
+    64                                                             Mississippi
+    67                                                     Kentucky, Tennessee
+    69                                                    Alabama, Mississippi
+    71                                                                Arkansas
+    72                                                               Louisiana
+    73                                                                Oklahoma
+    74                                                                   Texas
+    79                                           Arkansas, Louisiana, Oklahoma
+    81                                                                 Montana
+    82                                                                   Idaho
+    83                                                                 Wyoming
+    84                                                                Colorado
+    85                                                              New Mexico
+    86                                                                 Arizona
+    87                                                                    Utah
+    88                                                                  Nevada
+    89    Montana, Idaho, Wyoming, Colorado, New Mexico, Arizona, Utah, Nevada
+    91                                                              Washington
+    92                                                                  Oregon
+    93                                                              California
+    94                                                                  Alaska
+    95                                                                  Hawaii
+    99                                      Washington, Oregon, Alaska, Hawaii
+> tb <- table(d$STATECENSUS)
+> length(tb) # 50 states, plus D.C.
+[1] 51
+> sort(tb)
+
+    85     64     51     81     53     71     13     57     82     83     44 
+ 25681  26175  27119  27365  27368  27667  27966  28003  28042  28079  28358 
+    15     73     95     94     72     87     47     45     86     61     11 
+ 28675  28680  28719  28803  28862  29175  29506  29887  29896  30021  30220 
+    63     92     55     46     43     88     62     32     42     16     12 
+ 30323  30464  30619  30752  31210  31219  31442  33003  33264  33979  34316 
+    91     52     35     84     41     54     58     14     56     22     34 
+ 36418  36653  36752  38488  40027  41378  42472  44988  50771  53434  60578 
+    31     33     23     59     21     74     93 
+ 67534  73230  73312  90340 106486 110136 180439 
+> rm(tb)
+> d$DIVISION <- d$STATECENSUS %/% 10
+> sort(table(d$DIVISION))
+
+     6      7      1      4      2      8      3      9      5 
+117961 195345 200144 223004 233232 237945 271097 304843 374723 
+> d$REGION <- numeric(length(d$DIVISION))
+> d$REGION[d$DIVISION %in% c(1, 2)] <- 1
+> d$REGION[d$DIVISION %in% c(3, 4)] <- 2
+> d$REGION[d$DIVISION %in% c(5, 6, 7)] <- 3
+> d$REGION[d$DIVISION %in% c(8, 9)] <- 4
+> table(d$REGION)
+
+     1      2      3      4 
+433376 494101 688029 542788 
+> cd <- attr(d$STATECENSUS, "labels")
+> d$STATENAME <- names(cd)[match(d$STATECENSUS, cd)]
+> rm(cd)
+> sort(table(d$STATENAME))
+
+          New Mexico          Mississippi             Delaware 
+               25681                26175                27119 
+             Montana District of Columbia             Arkansas 
+               27365                27368                27667 
+             Vermont       South Carolina                Idaho 
+               27966                28003                28042 
+             Wyoming         North Dakota         Rhode Island 
+               28079                28358                28675 
+            Oklahoma               Hawaii               Alaska 
+               28680                28719                28803 
+           Louisiana                 Utah               Kansas 
+               28862                29175                29506 
+        South Dakota              Arizona             Kentucky 
+               29887                29896                30021 
+               Maine              Alabama               Oregon 
+               30220                30323                30464 
+       West Virginia             Nebraska             Missouri 
+               30619                30752                31210 
+              Nevada            Tennessee              Indiana 
+               31219                31442                33003 
+                Iowa          Connecticut        New Hampshire 
+               33264                33979                34316 
+          Washington             Maryland            Wisconsin 
+               36418                36653                36752 
+            Colorado            Minnesota             Virginia 
+               38488                40027                41378 
+             Georgia        Massachusetts       North Carolina 
+               42472                44988                50771 
+          New Jersey             Michigan                 Ohio 
+               53434                60578                67534 
+            Illinois         Pennsylvania              Florida 
+               73230                73312                90340 
+            New York                Texas           California 
+              106486               110136               180439 
+> 
+> # Time
+> table(d$YEAR)
+
+ 1994  1995  1996  1997  1998  1999  2000  2001  2002  2003  2004  2005  2006 
+85230 84524 73016 73843 73794 74023 74901 72231 86649 88221 86455 84993 84488 
+ 2007  2008  2009  2010  2011  2012  2013  2014  2015  2016  2017  2018  2019 
+83820 83973 84922 85458 83644 82953 82000 80936 80821 78373 78444 75139 72039 
+ 2020 
+63404 
+> 
+> # Other Covariates
+> head(d$AGE)
+<labelled<integer>[6]>: Age
+[1] 58 29 39 52 43 61
+
+Labels:
+ value               label
+     0        Under 1 year
+    90 90 (90+, 1988-2002)
+    99                 99+
+> summary(d$AGE)
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  18.00   30.00   41.00   41.02   52.00   65.00 
+> 
+> head(raw$SEX)
+<labelled<integer>[6]>: Sex
+[1] 2 1 2 2 2 2
+
+Labels:
+ value  label
+     1   Male
+     2 Female
+     9    NIU
+> table(raw$SEX)
+
+      1       2 
+1258901 1343986 
+> d$MALE <- 1 * (d$SEX == 1)
+> table(d$MALE)
+
+      0       1 
+1113683 1044611 
+> d$SEX <- NULL
+> 
+> head(d$RACE)
+<labelled<integer>[6]>: Race
+[1] 200 200 200 200 200 200
+
+Labels:
+ value                                                 label
+   100                                                 White
+   200                                           Black/Negro
+   300                          American Indian/Aleut/Eskimo
+   650                             Asian or Pacific Islander
+   651                                            Asian only
+   652                        Hawaiian/Pacific Islander only
+   700                           Other (single) race, n.e.c.
+   801                                           White-Black
+   802                                 White-American Indian
+   803                                           White-Asian
+   804                       White-Hawaiian/Pacific Islander
+   805                                 Black-American Indian
+   806                                           Black-Asian
+   807                       Black-Hawaiian/Pacific Islander
+   808                                 American Indian-Asian
+   809                       Asian-Hawaiian/Pacific Islander
+   810                           White-Black-American Indian
+   811                                     White-Black-Asian
+   812                           White-American Indian-Asian
+   813                 White-Asian-Hawaiian/Pacific Islander
+   814                     White-Black-American Indian-Asian
+   815             American Indian-Hawaiian/Pacific Islander
+   816                White-Black--Hawaiian/Pacific Islander
+   817       White-American Indian-Hawaiian/Pacific Islander
+   818                           Black-American Indian-Asian
+   819 White-American Indian-Asian-Hawaiian/Pacific Islander
+   820                       Two or three races, unspecified
+   830                       Four or five races, unspecified
+   999                                                 Blank
+> table(d$RACE)
+
+    100     200     300     650     651     652     700     801     802     803 
+1780884  219895   26290   15705   82051    6166    2056    4366   10864    3757 
+    804     805     806     807     808     809     810     811     812     813 
+   1239    1252     296      74      86    1132     685      73      99     814 
+    814     815     816     817     818     819     820     830 
+     31      63      56      23       6       6     212     113 
+> d$WHITE <- 1 * (d$RACE == 100)
+> table(d$WHITE)
+
+      0       1 
+ 377410 1780884 
+> mean(d$WHITE) # GBD: Seems too high.
+[1] 0.825135
+> d$RACE <- NULL
+> 
+> head(d$HISPAN)
+<labelled<integer>[6]>: Hispanic origin
+[1] 0 0 0 0 0 0
+
+Labels:
+ value                                    label
+     0                             Not Hispanic
+   100                                  Mexican
+   102                         Mexican American
+   103                        Mexicano/Mexicana
+   104                          Chicano/Chicana
+   108                       Mexican (Mexicano)
+   109                         Mexicano/Chicano
+   200                             Puerto Rican
+   300                                    Cuban
+   400                                Dominican
+   500                               Salvadoran
+   600                           Other Hispanic
+   610                   Central/South American
+   611 Central American, (excluding Salvadoran)
+   612                           South American
+   901                              Do not know
+   902            N/A (and no response 1985-87)
+> table(d$HISPAN)
+
+      0     100     102     104     108     200     300     400     500     600 
+1903465  114960   14076     885   22409   23480    8913    2277    2980   16776 
+    610     611     612     901     902 
+  31591    4551    4759    2421    4751 
+> d$HISPANIC <- 1 * (d$HISPAN != 0)
+> table(d$HISPANIC)
+
+      0       1 
+1903465  254829 
+> d$HISPAN <- NULL
+> 
+> head(d$EDUC)
+<labelled<integer>[6]>: Educational attainment recode
+[1] 73 60 30 71 73 10
+
+Labels:
+ value                                               label
+     0                                 NIU or no schooling
+     1                                        NIU or blank
+     2                                   None or preschool
+    10                                Grades 1, 2, 3, or 4
+    11                                             Grade 1
+    12                                             Grade 2
+    13                                             Grade 3
+    14                                             Grade 4
+    20                                       Grades 5 or 6
+    21                                             Grade 5
+    22                                             Grade 6
+    30                                       Grades 7 or 8
+    31                                             Grade 7
+    32                                             Grade 8
+    40                                             Grade 9
+    50                                            Grade 10
+    60                                            Grade 11
+    70                                            Grade 12
+    71                              12th grade, no diploma
+    72                         12th grade, diploma unclear
+    73                   High school diploma or equivalent
+    80                                   1 year of college
+    81                          Some college but no degree
+    90                                  2 years of college
+    91 Associate's degree, occupational/vocational program
+    92                Associate's degree, academic program
+   100                                  3 years of college
+   110                                  4 years of college
+   111                                   Bachelor's degree
+   120                                 5+ years of college
+   121                                  5 years of college
+   122                                 6+ years of college
+   123                                     Master's degree
+   124                          Professional school degree
+   125                                    Doctorate degree
+   999                                     Missing/Unknown
+> table(d$EDUC)
+
+     2     10     20     30     40     50     60     71     73     81     91 
+  5979  11985  26026  32992  33590  45967  72332  31041 662616 433064  97331 
+    92    111    123    124    125 
+100095 403571 145968  29277  26460 
+> d$HSDROPOUT <- 1 * (d$EDUC < 72)
+> d$HSGRAD <- 1 * (d$EDUC %in% c(72, 73))
+> d$SOMECOL <- 1 * (d$EDUC > 73 & d$EDUC <= 109)
+> d$BACHELORS <- 1 * (d$EDUC %in% c(110, 111))
+> d$ADVDEGREE <- 1 * (d$EDUC > 111)
+> table(d$HSDROPOUT)
+
+      0       1 
+1898382  259912 
+> table(d$HSGRAD)
+
+      0       1 
+1495678  662616 
+> table(d$SOMECOL)
+
+      0       1 
+1527804  630490 
+> table(d$BACHELORS)
+
+      0       1 
+1754723  403571 
+> table(d$ADVDEGREE)
+
+      0       1 
+1956589  201705 
+> sum(d$HSDROPOUT + d$HSGRAD + d$SOMECOL + d$BACHELORS + d$ADVDEGREE)
+[1] 2158294
+> nrow(d)
+[1] 2158294
+> d$EDUC <- NULL
+> 
+> # Skip METRO because it doesn't seem to have a clear interpretation.
+> head(d$METRO)
+<labelled<integer>[6]>: Metropolitan central city status
+[1] 0 0 0 0 0 0
+
+Labels:
+ value                       label
+     0            Not identifiable
+     1           Not in metro area
+     2                Central city
+     3        Outside central city
+     4 Central city status unknown
+     9             Missing/Unknown
+> table(d$METRO)
+
+     0      1      2      3      4 
+ 67589 454898 509659 818911 307237 
+> d$METRO <- NULL
+> 
+> head(d$UNION)
+<labelled<integer>[6]>: Union membership
+[1] 1 1 0 0 0 0
+
+Labels:
+ value                             label
+     0                               NIU
+     1                 No union coverage
+     2             Member of labor union
+     3 Covered by union but not a member
+> table(d$UNION)
+
+      0       1       2       3 
+1806490  300852   45942    5010 
+> d$UNION <- 1 * (d$UNION %in% c(2, 3))
+> table(d$UNION)
+
+      0       1 
+2107342   50952 
+> 
+> head(d$MARST)
+<labelled<integer>[6]>: Marital status
+[1] 1 6 6 6 6 6
+
+Labels:
+ value                   label
+     1 Married, spouse present
+     2  Married, spouse absent
+     3               Separated
+     4                Divorced
+     5                 Widowed
+     6    Never married/single
+     7     Widowed or Divorced
+     9                     NIU
+> table(d$MARST)
+
+      1       2       3       4       5       6 
+1207443   27484   49349  232092   43231  598695 
+> d$MARRIED <- 1 * (d$MARST %in% c(1, 2))
+> table(d$MARRIED)
+
+      0       1 
+ 923367 1234927 
+> d$MARST <- NULL
+> 
+> # Response 1: Employed (0/1 variable)
+> head(d$EMPSTAT)
+<labelled<integer>[6]>: Employment status
+[1] 10 12 32 32 21 32
+
+Labels:
+ value                          label
+     0                            NIU
+     1                   Armed Forces
+    10                        At work
+    12 Has job, not at work last week
+    20                     Unemployed
+    21 Unemployed, experienced worker
+    22         Unemployed, new worker
+    30             Not in labor force
+    31                NILF, housework
+    32           NILF, unable to work
+    33                   NILF, school
+    34                    NILF, other
+    35      NILF, unpaid, lt 15 hours
+    36                  NILF, retired
+> table(d$EMPSTAT)
+
+      1      10      12      21      22      32      34      36 
+  11782 1507977   53009   86890    4215  109054  277689  107678 
+> d$EMPLOYED <- 1 * (d$EMPSTAT %in% c(1, 10, 12))
+> table(d$EMPLOYED)
+
+      0       1 
+ 585526 1572768 
+> d$EMPSTAT <- NULL
+> 
+> # Fork the datasets before filtering that requires employment.
+> e <- d
+> e$EARNWEEK <- NULL
+> e$UHRSWORKORG <- NULL
+> names(e)
+ [1] "YEAR"        "MONTH"       "STATECENSUS" "AGE"         "UNION"      
+ [6] "DIVISION"    "REGION"      "STATENAME"   "MALE"        "WHITE"      
+[11] "HISPANIC"    "HSDROPOUT"   "HSGRAD"      "SOMECOL"     "BACHELORS"  
+[16] "ADVDEGREE"   "MARRIED"     "EMPLOYED"   
+> d$EMPLOYED <- NULL
+> 
+> # Response 2: Usual hours worked per week (continuous)
+> head(d$UHRSWORKORG)
+<labelled<double>[6]>: Usual hours worked per week, outgoing rotation groups
+[1] 999 999 999 999 999 999
+
+Labels:
+ value                 label
+   998            Don't Know
+   999 NIU (Not In Universe)
+> d <- d[d$UHRSWORKORG %notin% c(998, 999), ]
+> dim(d)
+[1] 145181     19
+> tails(d$UHRSWORKORG)
+   0%  0.1%  0.2%  0.5%    1%    2%    3%    4%    5%   25%   50%   75%   95% 
+    1     2     2     4     6     8    10    12    15    32    40    40    45 
+  96%   97%   98%   99% 99.5% 99.8% 99.9%  100% 
+   45    50    50    56    60    72    80    99 
+> d <- d[d$UHRSWORKORG >= quantile(d$UHRSWORKORG, 0.01) & d$UHRSWORKORG <= quantile(d$UHRSWORKORG, 0.99), ]
+> dim(d)
+[1] 142437     19
+> tails(d$UHRSWORKORG)
+   0%  0.1%  0.2%  0.5%    1%    2%    3%    4%    5%   25%   50%   75%   95% 
+    6     6     6     8     8    10    12    15    15    32    40    40    40 
+  96%   97%   98%   99% 99.5% 99.8% 99.9%  100% 
+   45    45    50    50    52    55    55    56 
+> d$WEEKLYHRS <- d$UHRSWORKORG
+> d$UHRSWORKORG <- NULL
+> 
+> # Response 3: Average hourly earnings (continuous)
+> head(d$EARNWEEK)
+<labelled<double>[6]>: Weekly earnings
+[1] 515.6 176.0 260.0 606.4 200.0 589.8
+
+Labels:
+   value  label
+ 9999.99 N.I.U.
+> d <- d[d$EARNWEEK != 9999.99, ]
+> dim(d)
+[1] 142408     19
+> years <- seq(min(d$YEAR), max(d$YEAR))
+> earns_week_top_code <- cbind(YEAR = years, EARNWEEKTOP = c(1923.00, 2884.61)[1 + (years >= 1998)])
+> d <- merge(d, earns_week_top_code)
+> rm(years, earns_week_top_code)
+> d$EARNWEEK.is.top.coded <- d$EARNWEEK == d$EARNWEEKTOP
+> x <- aggregate(EARNWEEK.is.top.coded ~ YEAR, data = d, mean)
+> x
+   YEAR EARNWEEK.is.top.coded
+1  1994          0.0020048115
+2  1995          0.0016860247
+3  1996          0.0012363487
+4  1997          0.0019758941
+5  1998          0.0001918649
+6  1999          0.0000000000
+7  2000          0.0011238060
+8  2001          0.0001956947
+9  2002          0.0003361345
+10 2003          0.0009787928
+11 2004          0.0006611570
+12 2005          0.0011842328
+13 2006          0.0001747030
+14 2007          0.0010924982
+15 2008          0.0028530670
+16 2009          0.0035741159
+17 2010          0.0026866244
+18 2011          0.0024472892
+19 2012          0.0025993316
+20 2013          0.0017811201
+21 2014          0.0027515723
+22 2015          0.0023743569
+23 2016          0.0022307848
+24 2017          0.0035474970
+25 2018          0.0044390638
+26 2019          0.0044519822
+27 2020          0.0052681992
+> max_percentage_top_coded <- ceiling(max(x$EARNWEEK.is.top.coded) * 100) / 100
+> max_percentage_top_coded
+[1] 0.01
+> d <- d[d$EARNWEEK < quantile(d$EARNWEEK, 1 - max_percentage_top_coded), ]
+> dim(d)
+[1] 140964     21
+> sum(d$EARNWEEK.is.top.coded)
+[1] 0
+> d$EARNWEEK.is.top.coded <- NULL
+> d$EARNWEEKTOP <- NULL
+> rm(x, max_percentage_top_coded)
+> cpi <- read.csv("inflation.csv")
+> cpi$INFADJ <- cpi$CPI[cpi$YEAR == 2020] / cpi$CPI
+> cpi$CPI <- NULL
+> d <- merge(d, cpi)
+> d$EARNWEEK2020 <- d$EARNWEEK * d$INFADJ
+> rm(cpi)
+> d$AHE <- d$EARNWEEK2020 / d$WEEKLYHRS
+> tails(d$AHE)
+          0%         0.1%         0.2%         0.5%           1%           2% 
+  0.03750712   2.81242843   4.33078859   6.77988347   7.24563243   7.75120120 
+          3%           4%           5%          25%          50%          75% 
+  8.05733578   8.28885678   8.46939844  11.25213608  15.10204664  21.36492499 
+         95%          96%          97%          98%          99%        99.5% 
+ 36.43436357  38.26047459  40.57911529  43.78625846  48.82689429  54.39649601 
+       99.8%        99.9%         100% 
+ 61.21675935  69.30285009 396.09395585 
+> d <- d[d$AHE >= quantile(d$AHE, 0.005) & d$AHE <= quantile(d$AHE, 0.995), ]
+> tails(d$AHE)
+       0%      0.1%      0.2%      0.5%        1%        2%        3%        4% 
+ 6.782301  6.920526  7.045528  7.245632  7.541636  7.925384  8.157799  8.362647 
+       5%       25%       50%       75%       95%       96%       97%       98% 
+ 8.524273 11.271202 15.102297 21.310684 35.794400 37.480229 39.353631 42.090821 
+      99%     99.5%     99.8%     99.9%      100% 
+45.946873 48.942944 51.368290 52.604959 54.396496 
+> d$EARNWEEK2020 <- NULL
+> d$EARNWEEK <- NULL
+> d$INFADJ <- NULL
+> 
+> # Final variables
+> 
+> names(e)
+ [1] "YEAR"        "MONTH"       "STATECENSUS" "AGE"         "UNION"      
+ [6] "DIVISION"    "REGION"      "STATENAME"   "MALE"        "WHITE"      
+[11] "HISPANIC"    "HSDROPOUT"   "HSGRAD"      "SOMECOL"     "BACHELORS"  
+[16] "ADVDEGREE"   "MARRIED"     "EMPLOYED"   
+> names(d)
+ [1] "YEAR"        "MONTH"       "STATECENSUS" "AGE"         "UNION"      
+ [6] "DIVISION"    "REGION"      "STATENAME"   "MALE"        "WHITE"      
+[11] "HISPANIC"    "HSDROPOUT"   "HSGRAD"      "SOMECOL"     "BACHELORS"  
+[16] "ADVDEGREE"   "MARRIED"     "WEEKLYHRS"   "AHE"        
+> setdiff(names(e), names(d))
+[1] "EMPLOYED"
+> setdiff(names(d), names(e))
+[1] "WEEKLYHRS" "AHE"      
+> intersect(names(e), names(d))
+ [1] "YEAR"        "MONTH"       "STATECENSUS" "AGE"         "UNION"      
+ [6] "DIVISION"    "REGION"      "STATENAME"   "MALE"        "WHITE"      
+[11] "HISPANIC"    "HSDROPOUT"   "HSGRAD"      "SOMECOL"     "BACHELORS"  
+[16] "ADVDEGREE"   "MARRIED"    
+> 
+> # Sanity checks
+> 
+> dim(d)
+[1] 139555     19
+> 
+> summary(lm(
++   data = d,
++   log(AHE) ~ AGE + I(AGE^2) + MALE + WHITE + HISPANIC + UNION + HSDROPOUT + SOMECOL + BACHELORS + ADVDEGREE
++ ))
+
+Call:
+lm(formula = log(AHE) ~ AGE + I(AGE^2) + MALE + WHITE + HISPANIC + 
+    UNION + HSDROPOUT + SOMECOL + BACHELORS + ADVDEGREE, data = d)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-5.228  2.422  2.714  3.059  5.787 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  1.318e-01  7.673e-03  17.170  < 2e-16 ***
+AGE          2.233e-03  1.875e-04  11.909  < 2e-16 ***
+I(AGE^2)     5.861e-05  3.954e-06  14.823  < 2e-16 ***
+MALE         2.077e-01  1.112e-02  18.676  < 2e-16 ***
+WHITE        1.085e-01  8.314e-03  13.056  < 2e-16 ***
+HISPANIC    -1.279e-01  1.987e-02  -6.437 1.22e-10 ***
+UNION       -4.268e-02  2.089e-02  -2.043   0.0410 *  
+HSDROPOUT   -2.801e-01  2.092e-02 -13.390  < 2e-16 ***
+SOMECOL     -1.121e-01  1.266e-02  -8.853  < 2e-16 ***
+BACHELORS    4.380e-01  2.211e-02  19.808  < 2e-16 ***
+ADVDEGREE   -9.345e-02  4.762e-02  -1.963   0.0497 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.8 on 139544 degrees of freedom
+Multiple R-squared:  0.0002064,	Adjusted R-squared:  0.0001348 
+F-statistic: 2.881 on 10 and 139544 DF,  p-value: 0.001338
+
+> 
+> table(d$YEAR)
+
+1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 
+4911 5274 4800 4992 5146 5294 5266 5060 5854 6027 5952 5822 5607 5359 5489 5198 
+2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 
+5097 5204 5260 4942 4982 4922 4800 4914 4813 4552 4018 
+> 
+> sapply(1994:2020, function(i) {
++   coef(lm(
++     data = d[d$YEAR == i, ],
++     log(AHE) ~ AGE + I(AGE^2) + MALE + WHITE + HISPANIC + UNION + HSDROPOUT + SOMECOL + BACHELORS + ADVDEGREE
++   ))
++ })
+                     [,1]          [,2]          [,3]         [,4]
+(Intercept)  920.40563836  -1.620232248  2.970079e+01 -16.54254959
+AGE           -9.26298792   0.076575503 -1.474264e+00   0.10647086
+I(AGE^2)       0.05047151  -0.001894346  3.752672e-03  -0.00073592
+MALE         -63.93801395 -16.897257620  2.079508e+01  -0.23362366
+WHITE         24.85238830  -1.807156843 -1.670037e+01   0.54541947
+HISPANIC    -139.34214282 -94.489693194  7.742001e+01 -23.40036169
+UNION         77.13459863   6.903825284  3.081699e+00  21.43963473
+HSDROPOUT    -28.15058155  80.560688504 -7.984779e+01  -4.59345843
+SOMECOL       14.64352031  -8.841804027  1.288654e+02   3.30203157
+BACHELORS    -60.28558724  -6.204435050 -1.148703e+02   0.48157882
+ADVDEGREE    117.70270929 717.152549837  3.198636e+02 168.68466340
+                     [,5]          [,6]          [,7]         [,8]
+(Intercept)  -1.894996063  6.539766e+00  -8.467074950   0.46094029
+AGE           0.075570563 -5.697789e-02   0.188157575  -0.28622928
+I(AGE^2)     -0.003682846 -4.495731e-05  -0.003357063   0.01241636
+MALE          8.707597109  1.737806e+00   8.485637007 -13.85362536
+WHITE         1.176850602 -1.153030e-01  -2.504776303  -8.39396062
+HISPANIC     25.207696105  4.708222e+00  15.558113560   5.68406975
+UNION       -21.117176007 -1.965606e+00  -7.613463788  11.49957809
+HSDROPOUT     1.724840191  1.667851e+00 -26.865751375  -7.11850812
+SOMECOL     -10.270962963  1.635712e+00   6.569451143  -0.23778960
+BACHELORS    30.645267140  6.931346e+00  30.857844770  57.37201228
+ADVDEGREE   107.548996034  2.151617e+01 197.201958356  56.00976354
+                     [,9]         [,10]         [,11]        [,12]        [,13]
+(Intercept) -15.364999882 -45.849945080 -168.57270838 -6.646747828 -14.47860399
+AGE          -0.407163371   0.307607486    2.85120209  0.171570296   1.11762968
+I(AGE^2)      0.004446596   0.002609268   -0.04465512 -0.001336519  -0.01910778
+MALE        -18.380416340 -12.414326838   67.13972603 -1.143967705   9.81807287
+WHITE        27.814203378   9.052149242  -11.96409157  1.584725515 -15.99396346
+HISPANIC    -16.185149303 -36.697624942 -110.71591389 -5.608276625  72.68561057
+UNION        11.172347972  15.815802139  107.58781083 -3.142350669 -94.88789504
+HSDROPOUT     7.315062043   6.394565428  -98.01112302  1.364745504  42.53078387
+SOMECOL      -0.080455043  -1.087551456    8.69707318 -1.531384830  -6.11506155
+BACHELORS    -8.724223456 -32.336661624   82.89573862 -1.113299737  -5.96875296
+ADVDEGREE   117.239162889 250.874230961  190.53545530 41.794537763 143.95300242
+                    [,14]         [,15]         [,16]         [,17]
+(Intercept)  7.307171e+00  36.720904463  -1.136578799  -44.45942069
+AGE          2.234490e-02  -0.419785502   0.101973074    0.30964713
+I(AGE^2)     7.082719e-04   0.008130184  -0.001613827   -0.03828358
+MALE        -7.989725e+00 -47.235967353   0.956217501  190.63413440
+WHITE        8.058005e-01  16.718094025   2.557544377  -16.14546194
+HISPANIC     1.433275e+01 -43.694652436 -13.661850917   29.69382951
+UNION       -3.355091e+00  83.936088792  11.044913224  -73.90058147
+HSDROPOUT   -3.442605e+00 -17.017846507  -9.426892832 -201.34894840
+SOMECOL     -1.236965e+01   2.331557436   0.248622094   88.69500010
+BACHELORS    3.232214e+00 -19.892545114  -8.674004960 -175.85780272
+ADVDEGREE    1.819756e+02 170.369626376  95.365851248  450.51010676
+                    [,18]         [,19]        [,20]        [,21]         [,22]
+(Intercept) -11.211450747    8.41032437 -77.76110118  876.1411269  440.15037186
+AGE           0.214172725    1.86171470   0.93031542   -8.0335728   -4.70501498
+I(AGE^2)     -0.003423164   -0.04128937  -0.01019275    0.1453839    0.03403493
+MALE          3.217922083   87.23593155  40.43674791 -262.7687931  -58.95855802
+WHITE         0.806847357  -55.34904327  -3.41699009   -1.6931504    0.65622117
+HISPANIC      0.657942720  101.25819575 -53.87722134 -560.9609048   35.50275807
+UNION        -6.435184291  180.41676716  35.96197430  957.0784101  278.52405448
+HSDROPOUT     4.575413738 -121.94809371 -45.67114380 -539.3749830 -237.42320923
+SOMECOL       1.486888983   28.99373308   5.29865390   34.2400825   57.95939830
+BACHELORS    14.314110362  -60.43429781 -55.92520962  -29.7758214 -232.74256612
+ADVDEGREE    16.388598422   93.98101221 183.99075335  576.1052590  202.15413472
+                   [,23]        [,24]        [,25]         [,26]         [,27]
+(Intercept) -106.7561987 266.59768727 -9.660985309 -2.153550e+01  1.6425176856
+AGE            1.3371084  -3.39171237  0.121130894  9.566035e-03  0.0472573640
+I(AGE^2)      -0.0283777   0.02157324 -0.001639318 -9.625634e-05 -0.0004987949
+MALE          72.9571628 -78.79516523  9.413725037  2.835336e+01  0.1454257566
+WHITE        -18.9035847  35.79843371 -8.481540445 -1.440325e+01  0.0874784967
+HISPANIC      53.5653540 -12.18992505 -1.633526417  4.952955e+00 -0.0660658510
+UNION        -57.3167827 118.16009561 -3.805498971 -1.700338e+01  0.1816612825
+HSDROPOUT    -39.7144357 -32.54762941  0.392117438  3.806868e+00 -0.1206140913
+SOMECOL       23.3375471   6.74169343  8.210703214  4.537028e+00  0.0650726328
+BACHELORS    -10.0041101 -35.67080145 18.901644663  3.387896e+01  0.2171398671
+ADVDEGREE     22.2954529 329.18779539 24.761499187  4.216872e+01  0.3246771635
+> 
+> table(d$DIVISION)
+
+    1     2     3     4     5     6     7     8     9 
+12637 12910 19708 17554 21180  7915 11599 16195 19857 
+> 
+> sapply(1:9, function(i) {
++   coef(lm(
++     data = d[d$DIVISION == i, ],
++     log(AHE) ~ AGE + I(AGE^2) + MALE + WHITE + HISPANIC + UNION + HSDROPOUT + SOMECOL + BACHELORS + ADVDEGREE
++   ))
++ })
+                     [,1]          [,2]          [,3]          [,4]
+(Intercept)  0.0206137485  2.4898811591  4.472547e-02  0.0400369316
+AGE         -0.0100505436  0.0077660576  2.501489e-03  0.0592458775
+I(AGE^2)     0.0002419147  0.0005645518  2.463791e-05  0.0001313035
+MALE         0.2029604234  0.3740954924 -7.240289e-02  0.8376867685
+WHITE       -0.1758116732  0.0578857790  2.860031e-02  0.3520801761
+HISPANIC     0.9339843791 -0.3757756824  6.001327e-01 -0.5905399277
+UNION        2.4627956919  0.3859548700  3.995631e-01 -0.7805204411
+HSDROPOUT    0.0031223076 -0.3193141729 -4.691435e-01 -0.5023195476
+SOMECOL      8.0165959092 -0.2701563373  1.276064e+00 -0.2172039355
+BACHELORS    1.5241398427 -0.4458432464 -4.660745e-01 -0.3609905738
+ADVDEGREE    1.9468323736 -0.0657858749 -1.123979e-01 -1.6075974370
+                     [,5]          [,6]          [,7]         [,8]
+(Intercept)  7.288105e-02  21842.551363  0.2120992526  4.731576709
+AGE          2.594368e-03    167.021941 -0.0001117630 -0.160979573
+I(AGE^2)     2.610702e-05     -1.487212  0.0003741271  0.001343740
+MALE         3.968233e-01 -18024.072033  1.9288215432 -0.026749669
+WHITE        8.383326e-01   5350.651662  0.2545238669  1.544337135
+HISPANIC     1.110601e+01 -44795.412711  1.2795741999  3.511632196
+UNION        1.007299e+00   8441.205884  0.2516869751  2.579184105
+HSDROPOUT   -1.252485e-01  -2292.143954  1.5587150177 -0.001550783
+SOMECOL      3.050831e-01    175.087959  1.2167268390  0.960282470
+BACHELORS   -1.861369e-01  -1436.484005  1.2653027010  0.358655006
+ADVDEGREE   -3.418888e-01    562.368075  1.7482385806  3.361698511
+                     [,9]
+(Intercept)  3.339186e-02
+AGE          1.545048e-02
+I(AGE^2)    -9.089144e-06
+MALE        -1.308170e-03
+WHITE        7.879382e-01
+HISPANIC    -3.878693e-01
+UNION        3.701221e-01
+HSDROPOUT   -1.008385e-01
+SOMECOL      1.528637e-01
+BACHELORS   -4.523872e-01
+ADVDEGREE   -8.764980e-01
+> 
+> table(d$REGION)
+
+    1     2     3     4 
+25547 37262 40694 36052 
+> 
+> sapply(1:4, function(i) {
++   coef(lm(
++     data = d[d$REGION == i, ],
++     log(AHE) ~ AGE + I(AGE^2) + MALE + WHITE + HISPANIC + UNION + HSDROPOUT + SOMECOL + BACHELORS + ADVDEGREE
++   ))
++ })
+                     [,1]          [,2]         [,3]         [,4]
+(Intercept)  0.2116446957   0.484678399 84787.960314 83749.289990
+AGE         -0.0011452510  -0.043674171  -843.906621  -436.965936
+I(AGE^2)     0.0001716239  -0.001332609    -1.445809     3.346251
+MALE         0.8260629651  -3.310846386 35733.619283 -5781.913802
+WHITE        0.1840364235  -0.504061192 -1568.980730   643.091157
+HISPANIC    -0.3579782851 -33.704899865  1931.099661 -2146.508980
+UNION       -0.1393987783 -24.719581274  -795.941989   260.075227
+HSDROPOUT    0.4387728274  13.893300764  -368.360540  -901.536056
+SOMECOL      1.9836749411  27.149112569    45.147400    -2.136933
+BACHELORS    3.7493165318  26.110017885    -4.819945   -27.215687
+ADVDEGREE    1.6515646427  36.174537305   519.965661    60.623997
+> 
+> 
+> # Save the data
+> 
+> saveRDS(e, "../data-clean/d1.rds", compress = "xz")
+> saveRDS(d, "../data-clean/d2.rds", compress = "xz")
+> 
+> sessionInfo()
+R version 4.4.1 (2024-06-14)
+Platform: x86_64-pc-linux-gnu
+Running under: Ubuntu 22.04.5 LTS
+
+Matrix products: default
+BLAS/LAPACK: /usr/lib/x86_64-linux-gnu/libmkl_rt.so;  LAPACK version 3.8.0
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+time zone: America/Denver
+tzcode source: system (glibc)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] ipumsr_0.8.1
+
+loaded via a namespace (and not attached):
+ [1] gourd_0.2.13     utf8_1.2.4       salso_0.3.38     R6_2.5.1        
+ [5] tidyselect_1.2.1 tzdb_0.4.0       magrittr_2.0.3   glue_1.7.0      
+ [9] tibble_3.2.1     pkgconfig_2.0.3  dplyr_1.1.4      generics_0.1.3  
+[13] readr_2.1.5      lifecycle_1.0.4  xml2_1.3.6       cli_3.6.3       
+[17] fansi_1.0.6      vctrs_0.6.5      zeallot_0.1.0    compiler_4.4.1  
+[21] forcats_1.0.0    haven_2.5.4      purrr_1.0.2      tools_4.4.1     
+[25] hms_1.1.3        pillar_1.9.0     Rcpp_1.0.13      hipread_0.2.4   
+[29] rlang_1.1.4     
+> 
+> proc.time()
+   user  system elapsed 
+ 82.886   1.418  41.707 

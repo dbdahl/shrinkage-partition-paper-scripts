@@ -1,0 +1,10 @@
+#!/usr/bin/fish
+
+set N_REPS 50
+set N_SEQ 100 400
+
+for REP in (seq $N_REPS)
+    for N in $N_SEQ
+        echo ./XX-make-simulated-data $N $REP
+    end
+end

@@ -1,0 +1,80 @@
+#!/usr/bin/env Rscript
+
+# args <- c("100", "30")
+args <- commandArgs(TRUE)
+if (length(args) != 2) {
+  cat("usage: N_OBSERVATIONS_PER_ITEM REPLICATION_NUMBER\n")
+  q()
+}
+
+n <- as.integer(args[1])
+rep <- as.integer(args[2])
+
+filename <- paste0("data-clean/d2-sim-", n, "-", rep, ".rds")
+if (file.exists(filename)) {
+  cat(sprintf("File '%s' already exists.", filename))
+  q()
+}
+
+seed <- if (n >= rep) {
+  n * n + n + rep
+} else {
+  n + rep * rep
+}
+
+set.seed(seed)
+
+all <- readRDS("data-clean/d2.rds")
+value <- sort(unique(all$STATECENSUS))
+map <- cbind(KEY = seq_along(value), STATECENSUS = value)
+all <- merge(all, map)
+all <- all[order(all$KEY), ]
+
+attach(all)
+y <- log(AHE)
+X <- cbind(AGE, AGE2 = AGE^2, MALE, WHITE, HISPANIC, UNION, MARRIED, WEEKLYHRS, WEEKLYHRS2 = WEEKLYHRS^2)
+W <- cbind(INTERCEPT = 1, HSGRAD, SOMECOL, BACHELORSPLUS = BACHELORS + ADVDEGREE)   # HSDROPOUT is omitted category
+detach(all)
+
+Z <- cbind(X, W)
+coef <- solve(t(Z) %*% Z, t(Z) %*% y)
+coef
+
+resid <- y - Z %*% coef
+sigma <- sqrt(sum(resid^2) / ( length(y) - ncol(Z) - 1))
+sigma
+
+cov <- sigma^2 * solve(t(Z) %*% Z)
+
+anchor <- scan("anchors/regions.txt")
+anchor
+n_states <- length(anchor)
+
+global_beta <- coef[seq_len(ncol(X)), , drop = FALSE]
+local_beta_ <- coef[ncol(X) + seq_len(ncol(W)), , drop = FALSE]
+local_beta <- list(
+  local_beta_ + c(-0.04, -0.02, -0.02, -0.02),
+  local_beta_ + c( 0.04,  0.02,  0.00, -0.02),
+  local_beta_ + c(-0.02, -0.03,  0.00,  0.03),
+  local_beta_ + c( 0.01,  0.02,  0.03,  0.04)
+)
+
+newall <- Reduce(rbind, lapply(seq_len(n_states), \(key) {
+  rows <- which(all$KEY == key)
+  x <- all[sample(rows, n, replace = TRUE), , drop = FALSE]
+  attach(x)
+  y <- log(AHE)
+  X <- cbind(AGE, AGE2 = AGE^2, MALE, WHITE, HISPANIC, UNION, MARRIED, WEEKLYHRS, WEEKLYHRS2 = WEEKLYHRS^2)
+  W <- cbind(INTERCEPT = 1, HSGRAD, SOMECOL, BACHELORSPLUS = BACHELORS + ADVDEGREE)   # HSDROPOUT is omitted category
+  detach(x)
+  cluster <- anchor[key]
+  mean <- X %*% global_beta + W %*% local_beta[[cluster]]
+  y <- rnorm(length(mean), mean = mean, sd = sigma)
+  x$AHE <- exp(y)
+  x
+}))
+dim(newall)
+
+saveRDS(newall, filename)
+
+

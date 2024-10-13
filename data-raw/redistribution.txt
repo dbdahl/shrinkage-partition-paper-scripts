@@ -1,0 +1,10 @@
+https://cps.ipums.org/cps/terms.shtml
+
+Redistribution: You will not redistribute the data without permission
+
+You may publish a subset of the data to meet journal requirements for accessing data related to a particular publication. Contact us for permission for any other redistribution; we will consider requests for free and commercial redistribution.
+
+
+Citation: Cite the IPUMS CPS data appropriately
+
+For information on proper citation refer to citation and use. Publications and research reports making use of IPUMS CPS should be added to our Bibliography.

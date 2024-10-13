@@ -1,0 +1,9 @@
+#!/usr/bin/fish
+
+for distribution in cpp_binder cpp_vi lsp sp
+    for anchor in regions chaos
+        for loss in ri vi
+            echo ./XX-calibrate-priors $distribution $anchor $loss
+        end
+    end
+end
