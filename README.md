@@ -118,7 +118,7 @@ The IMPUS CPS license agreement says, "You may publish a subset of the data to m
 Provide a short (< 100 words), high-level description of the code. If necessary, more details can be provided in files that accompany the code. If no code is provided, please state this and say why (e.g., if the paper contains no computational work).
 -->
 
-The code consi
+The codes consists on a mix of [fish](https://fishshell.com/) shell scripts, R scripts, and an R package named 'gourd'.
 
 ## Description
 
