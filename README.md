@@ -230,7 +230,7 @@ The materials provided should provide a straightforward way for reviewers and re
 The provided workflow reproduces:
 
 - [x] Any numbers provided in text in the paper
-- [ ] The computational method(s) presented in the paper (i.e., code is provided that implements the method(s))
+- [x] The computational method(s) presented in the paper (i.e., code is provided that implements the method(s))
 - [x] All tables and figures in the paper
 - [ ] Selected tables and figures in the paper, as explained and justified below:
 
@@ -276,37 +276,37 @@ Steps:
 + Run each script, in numerical order.
     + Scripts whose names end in '.R' should be run by R using, e.g., 'R CMD BATCH 0010-clean.R'.
     + Scripts whose names match the glob '*-jobs-*' produce commands, one per line, that need to be executed before running the next script.
-        + You may wish to run these concurrently using, e.g. GNU Parallel (https://www.gnu.org/software/parallel/).
+        + You may wish to run these concurrently using, e.g., GNU Parallel (https://www.gnu.org/software/parallel/).
 + In all, there are many thousands of single-thread jobs to run.
     + Practically speaking, to reproduce every result in the paper, many Linux servers running for several days would be need.
-    + To avoid needing to run a particular script, the reader may refer to the associated '*.Rout' files that are available in the repository.
+    + To avoid needing to run a particular script, the reader may refer to the associated \*.Rout, \*.RData, and \*.rds files that are available in the repository.
 
 Below is a mapping between elements in the paper and the scripts that produce those results:
 
-    | Element of the Paper                         | Script filename                     |
-    |----------------------------------------------|-------------------------------------|
-    | First paragraph of Section 6                 | 0010-clean.R                        |
-    | Last paragraph of Section 6.1                | 0014-jobs-ols                       |
-    | ... continued                                | 0016-summarize-ols.R                |
-    | Prepare "SP - Idiosyncratic" in Section 6.1  | 0020-make-borders-shrinkage.R       |
-    | "Relative Fit" column in Table 1             | 0030-jobs-year-by-year              |
-    | ... continued                                | 0040-summarize-year-by-year.R       |
-    | Out-of-sample fits for Section 6.2           | 0050-jobs-hierarchical              |
-    | ... continued                                | 0060-summarize-hierarchical.R       |
-    | Out-of-sample fits for Section 6.3           | 0070-jobs-temporal                  |
-    | ... continued                                | 0080-summarize-temporal.R           |
-    | "Time" column in Table 1                     | 0090-jobs-year-by-year-timing       |
-    | ... continued                                | 0100-year-by-year-timings.R         |
-    | Timing in Sections 6.2, 6.3, and 7.2         | 0110-jobs-dependent-timings         |
-    | ... continued                                | 0120-dependent-timings.R            |
-    | Timing in Section 7.2                        | 0130-jobs-timining-big              |
-    | ... continued                                | 0140-summarize-timings-big.R        |
-    | Timing in Section 7.2 for number of clusters | 0150-jobs-timining-nclusters        |
-    | ... continued                                | 0160-summarize-timings-nclusters.R  |
-    | Prepare simulated data for Section 7.1       | 0210-jobs-simulated-data            |
-    | Calibrate priors in Section 7.1              | 0215-jobs-calibrate-priors          |
-    | Out-of-sample fits for Section 7.1           | 0220-jobs-simulation                |
-    | ... continued                                | 0230-summarize-simulation.R         |
+| Element of the Paper                         | Script filename                     |
+|----------------------------------------------|-------------------------------------|
+| First paragraph of Section 6                 | 0010-clean.R                        |
+| Last paragraph of Section 6.1                | 0014-jobs-ols                       |
+| ... continued                                | 0016-summarize-ols.R                |
+| Prepare "SP - Idiosyncratic" in Section 6.1  | 0020-make-borders-shrinkage.R       |
+| "Relative Fit" column in Table 1             | 0030-jobs-year-by-year              |
+| ... continued                                | 0040-summarize-year-by-year.R       |
+| Out-of-sample fits for Section 6.2           | 0050-jobs-hierarchical              |
+| ... continued                                | 0060-summarize-hierarchical.R       |
+| Out-of-sample fits for Section 6.3           | 0070-jobs-temporal                  |
+| ... continued                                | 0080-summarize-temporal.R           |
+| "Time" column in Table 1                     | 0090-jobs-year-by-year-timing       |
+| ... continued                                | 0100-year-by-year-timings.R         |
+| Timing in Sections 6.2, 6.3, and 7.2         | 0110-jobs-dependent-timings         |
+| ... continued                                | 0120-dependent-timings.R            |
+| Timing in Section 7.2                        | 0130-jobs-timining-big              |
+| ... continued                                | 0140-summarize-timings-big.R        |
+| Timing in Section 7.2 for number of clusters | 0150-jobs-timining-nclusters        |
+| ... continued                                | 0160-summarize-timings-nclusters.R  |
+| Prepare simulated data for Section 7.1       | 0210-jobs-simulated-data            |
+| Calibrate priors in Section 7.1              | 0215-jobs-calibrate-priors          |
+| Out-of-sample fits for Section 7.1           | 0220-jobs-simulation                |
+| ... continued                                | 0230-summarize-simulation.R         |
 
 File whose names start with "XX-" are helper scripts called or sourced by those above.
 
