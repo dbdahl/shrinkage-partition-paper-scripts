@@ -155,7 +155,7 @@ Please cite all software packages in the References Section in similar fashion t
 Software implementing our SP distribution is available as an R package based
 on Rust <https://github.com/dbdahl/gourd-package>. The Git tag to use
 is [0.2.13](https://github.com/dbdahl/gourd-package/releases/tag/0.2.13).
-A snapshot of the source package at this hash is inluded in this
+A snapshot of the source package at this tag is included in this
 repository in the file 'gourd_0.2.13.tar.gz'.
 
 #### Version of primary software used
