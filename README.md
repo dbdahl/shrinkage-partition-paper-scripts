@@ -57,7 +57,7 @@ If the data are publicly available, see the *Publicly available data* section. O
 
 ### Publicly available data
 
-- [ ] Data are available online at: https://github.com/dbdahl/shrinkage-partition-paper-scripts  
+- [x] Data are available online at: https://github.com/dbdahl/shrinkage-partition-paper-scripts  
       See in particular the script '0010-clean.R' to read the data from the 'data-raw' directory.
 
 - [ ] Data are available as part of the paper’s supplementary material.
@@ -80,6 +80,8 @@ Please discuss the lack of publicly available data. For example:
 -	why the value of the paper's scientific contribution outweighs the lack of reproducibility.
 -->
 
+None
+
 ## Description
 
 ### File format(s)
@@ -90,7 +92,7 @@ Check all that apply
 - [ ] CSV or other plain text.
 - [ ] Software-specific binary format (.Rda, Python pickle, etc.): pkcle
 - [ ] Standardized binary format (e.g., netCDF, HDF5, etc.): 
-- [x] Other (please specify): The data is in IMPUS's format and read into R using their CRAN package "ipumsr" as shown in the '0010-clean.R' script. 
+- [x] Other (please specify): The data is in IMPUS's format and read into R using their CRAN package [ipumsr](https://cran.r-project.org/package=ipumsr) as shown in the '0010-clean.R' script. 
 
 ### Data dictionary
 
