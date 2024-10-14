@@ -18,7 +18,8 @@ Note that older versions of RStudio (versions lower than 1.3) may not create a f
 4. If you are comfortable with Markdown syntax, you may choose to include any Markdown-compliant formatting in the form. For example, you may wish to include R code chunks and compile this document in R Markdown.
 -->
 
-This form documents the artifacts associated with the article (i.e., the data and code supporting the computational findings) and describes how to reproduce the findings.
+This form documents the artifacts associated with the article "Dependent Random Partitions by Shrinking Toward an Anchor"
+ (i.e., the data and code supporting the computational findings) and describes how to reproduce the findings.
 
 
 # Part 1: Data
@@ -334,8 +335,12 @@ In all, there are many thousands of single-thread jobs to run.  Practically spea
 OPTIONAL: Additional documentation provided (e.g., R package vignettes, demos or other examples) that show how to use the provided code/software in other settings.
 -->
 
+None
+
 # Notes (optional)
 
 <!--
 OPTIONAL: Any other relevant information not covered on this form. If reproducibility materials are not publicly available at the time of submission, please provide information here on how the reviewers can view the materials.
 -->
+
+None
