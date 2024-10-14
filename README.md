@@ -57,7 +57,7 @@ If the data are publicly available, see the *Publicly available data* section. O
 
 ### Publicly available data
 
-- [ ] Data are available online at: https://github.com/dbdahl/shrinkage-partition-paper-scripts
+- [ ] Data are available online at: https://github.com/dbdahl/shrinkage-partition-paper-scripts  
       See in particular the script '0010-clean.R' to read the data from the 'data-raw' directory.
 
 - [ ] Data are available as part of the paper’s supplementary material.
