@@ -19,7 +19,7 @@ Note that older versions of RStudio (versions lower than 1.3) may not create a f
 -->
 
 This form documents the artifacts associated with the article "Dependent Random Partitions by Shrinking Toward an Anchor"
- (i.e., the data and code supporting the computational findings) and describes how to reproduce the findings.
+(i.e., the data and code supporting the computational findings) and describes how to reproduce the findings.
 
 
 # Part 1: Data
@@ -174,13 +174,13 @@ Include version numbers (e.g., version numbers for any R or Python packages used
 -->
 
 The follow R packages are used in the replication scripts:
-+ mvtnorm (1.2.5)
++ mvtnorm (1.2-5)
 + coda (0.19-4.1)
 + ipumsr (0.8.1)
 + salso (0.3.38)
 + MASS (7.3-61)
 + fields (16.2)
-+ txtplot (1.0.4)
++ txtplot (1.0-4)
 
 ### Supporting system/hardware requirements (optional)
 
