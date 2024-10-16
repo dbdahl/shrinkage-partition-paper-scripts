@@ -129,7 +129,7 @@ pseudo_correlation_plot <- function(filename, samples, loss = RI, max_minus = FA
   }
   # tikz(filename, width = 6, height = 6)
   png(filename, width = 1200, height = 1200, pointsize = 48)
-  par(mar = c(2.2, 3.1, 0.1, 0.6), family = "serif")
+  par(mar = c(2.2, 3.1, 0.1, 0.7), family = "serif")
   image(lm4[, rev(seq_len(nrow(lm4)))], axes = FALSE)
   box()
   axis(1, at = c(1, 6, 11, 16, 21, 26) / 26, label = c(1995, 2000, 2005, 2010, 2015, 2020), las = 1)
@@ -140,51 +140,4 @@ pseudo_correlation_plot <- function(filename, samples, loss = RI, max_minus = FA
 n_samples <- 500
 pseudo_correlation_plot(file.path(image_directory, "ri_matrix_sp.png"), samples, n = n_samples, loss = RI)
 pseudo_correlation_plot(file.path(image_directory, "ri_matrix_crp.png"), samples_crp, n = n_samples, loss = RI)
-
-
-## Shrinkage and grit
-anchor <- as.integer(scan("anchors/regions.txt"))
-
-for (model in c("hierarchical", "temporal")) {
-  files <- system2("fd",c("-I","-g","'*.rds'",paste0("out/in-sample-", model, "-1994-", year)), stdout = TRUE)
-  
-  all_shrinkages <- Reduce(c, lapply(files, \(x) readRDS(x)$fit$shrinkage))
-  shrinkage_alpha <- 5
-  shrinkage_beta <- 1
-  cat("Prior mean: ", shrinkage_alpha / shrinkage_beta, "\n", sep = "")
-  cat("Posterior mean: ", mean(all_shrinkages), "\n", sep = "")
-  
-  all_grits <- Reduce(c, lapply(files, \(x) readRDS(x)$fit$grit))
-  grit_alpha <- 1
-  grit_beta <- 1
-  cat("Prior mean: ", grit_alpha / (grit_alpha + grit_beta), "\n", sep = "")
-  cat("Posterior mean: ", mean(all_grits), "\n", sep = "")
-  
-  kde <- kde2d(all_shrinkages, all_grits, n = 100)
-
-  set.seed(34534512)
-  out <- summarize_prior_on_shrinkage_and_grit(anchor, n_mc_samples = 1000, shrinkage_n = 100, shrinkage_shape = shrinkage_alpha, shrinkage_rate = shrinkage_beta, grit_n = 100, grit_shape1 = grit_alpha, grit_shape2 = grit_beta, domain_specification = list(shrinkage_lim = c(0, 10), grit_lim = c(0.0, 1.0)))
-  
-  png(file.path(image_directory, sprintf("shrinkage_grit_rand_%s.png", model)), width = 1200, height = 1200, pointsize = 48)
-  par(mar = c(4, 4, 0.2, 2) + 0.1, las = 1, family = "serif")
-  image.plot(out$shrinkage, out$grit, out$expected_rand_index, xlab = "Shrinkage", ylab = "Grit", legend.width = 0.7, legend.mar = 3.1)
-  # image(out$shrinkage, out$grit, out$expected_rand_index, xlab = "Shrinkage", ylab = "Grit")
-  contour(out$shrinkage, out$grit, exp(out$log_density), add = TRUE, labcex = 1.4, lwd = 6, lty = 3, drawlabels = FALSE)
-  contour(kde, add = TRUE, lwd = 6, lty = 1, drawlabels = FALSE)
-  dev.off()
-  
-  png(file.path(image_directory, sprintf("shrinkage_grit_entropy_%s.png", model)), width = 1200, height = 1200, pointsize = 48)
-  par(mar = c(4, 4, 0.2, 2) + 0.1, las = 1, family = "serif")
-  image.plot(out$shrinkage, out$grit, out$expected_entropy, xlab = "Shrinkage", ylab = "Grit", legend.width = 0.7, legend.mar = 3.1)
-  # image(out$shrinkage, out$grit, out$expected_entropy, xlab = "Shrinkage", ylab = "Grit")
-  contour(out$shrinkage, out$grit, exp(out$log_density), add = TRUE, labcex = 1.6, lwd = 6, lty = 3, drawlabels = FALSE)
-  contour(kde, add = TRUE, lwd = 6, lty = 1, drawlabels = FALSE)
-  dev.off()
-}
-
-
-system2("cp", c(file.path(image_directory, "*"), "../../focal-paper-overleaf/img"))
-
-
-
 
