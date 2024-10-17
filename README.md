@@ -18,8 +18,7 @@ Note that older versions of RStudio (versions lower than 1.3) may not create a f
 4. If you are comfortable with Markdown syntax, you may choose to include any Markdown-compliant formatting in the form. For example, you may wish to include R code chunks and compile this document in R Markdown.
 -->
 
-This form documents the artifacts associated with the article "Dependent Random Partitions by Shrinking Toward an Anchor"
-(i.e., the data and code supporting the computational findings) and describes how to reproduce the findings.
+This form documents the artifacts associated with the article (i.e., the data and code supporting the computational findings) and describes how to reproduce the findings.
 
 
 # Part 1: Data
@@ -174,6 +173,7 @@ Include version numbers (e.g., version numbers for any R or Python packages used
 -->
 
 The follow R packages are used in the replication scripts:
+
 + mvtnorm (1.2-5)
 + coda (0.19-4.1)
 + ipumsr (0.8.1)
@@ -272,6 +272,7 @@ Describe how to use the materials provided to reproduce analyses in the manuscri
 -->
 
 Steps:
+
 + Clone the Git repository at https://github.com/dbdahl/shrinkage-partition-paper-scripts.
 + Sort the scripts whose file names start with 4 digits, e.g. '0010-clean.R', '0014-jobs-ols', ..., '0230-summarize-simulation.R'
 + Run each script, in numerical order.
@@ -284,30 +285,30 @@ Steps:
 
 Below is a mapping between elements in the paper and the scripts that produce those results:
 
-| Element of the Paper                         | Script filename                     |
-|----------------------------------------------|-------------------------------------|
-| First paragraph of Section 6                 | 0010-clean.R                        |
-| Last paragraph of Section 6.1                | 0014-jobs-ols                       |
-| ... continued                                | 0016-summarize-ols.R                |
-| Prepare "SP - Idiosyncratic" in Section 6.1  | 0020-make-borders-shrinkage.R       |
-| "Relative Fit" column in Table 1             | 0030-jobs-year-by-year              |
-| ... continued                                | 0040-summarize-year-by-year.R       |
-| Out-of-sample fits for Section 6.2           | 0050-jobs-hierarchical              |
-| ... continued                                | 0060-summarize-hierarchical.R       |
-| Out-of-sample fits for Section 6.3           | 0070-jobs-temporal                  |
-| ... continued                                | 0080-summarize-temporal.R           |
-| "Time" column in Table 1                     | 0090-jobs-year-by-year-timing       |
-| ... continued                                | 0100-year-by-year-timings.R         |
-| Timing in Sections 6.2, 6.3, and 7.2         | 0110-jobs-dependent-timings         |
-| ... continued                                | 0120-dependent-timings.R            |
-| Timing in Section 7.2                        | 0130-jobs-timining-big              |
-| ... continued                                | 0140-summarize-timings-big.R        |
-| Timing in Section 7.2 for number of clusters | 0150-jobs-timining-nclusters        |
-| ... continued                                | 0160-summarize-timings-nclusters.R  |
-| Prepare simulated data for Section 7.1       | 0210-jobs-simulated-data            |
-| Calibrate priors in Section 7.1              | 0215-jobs-calibrate-priors          |
-| Out-of-sample fits for Section 7.1           | 0220-jobs-simulation                |
-| ... continued                                | 0230-summarize-simulation.R         |
+| Script Filename                     | Element of the Paper                         |
+|-------------------------------------| ---------------------------------------------|
+| 0010-clean.R                        | First paragraph of Section 6                 |
+| 0014-jobs-ols                       | Last paragraph of Section 6.1                |
+| 0016-summarize-ols.R                | ... continued                                |
+| 0020-make-borders-shrinkage.R       | Prepare "SP - Idiosyncratic" in Section 6.1  |
+| 0030-jobs-year-by-year              | "Relative Fit" column in Table 1             |
+| 0040-summarize-year-by-year.R       | ... continued                                |
+| 0050-jobs-hierarchical              | Out-of-sample fits for Section 6.2           |
+| 0060-summarize-hierarchical.R       | ... continued                                |
+| 0070-jobs-temporal                  | Out-of-sample fits for Section 6.3           |
+| 0080-summarize-temporal.R           | ... continued                                |
+| 0090-jobs-year-by-year-timing       | "Time" column in Table 1                     |
+| 0100-year-by-year-timings.R         | ... continued                                |
+| 0110-jobs-dependent-timings         | Timing in Sections 6.2, 6.3, and 7.2         |
+| 0120-dependent-timings.R            | ... continued                                |
+| 0130-jobs-timining-big              | Timing in Section 7.2                        |
+| 0140-summarize-timings-big.R        | ... continued                                |
+| 0150-jobs-timining-nclusters        | Timing in Section 7.2 for number of clusters |
+| 0160-summarize-timings-nclusters.R  | ... continued                                |
+| 0210-jobs-simulated-data            | Prepare simulated data for Section 7.1       |
+| 0215-jobs-calibrate-priors          | Calibrate priors in Section 7.1              |
+| 0220-jobs-simulation                | Out-of-sample fits for Section 7.1           |
+| 0230-summarize-simulation.R         | ... continued                                |
 
 File whose names start with "XX-" are helper scripts called or sourced by those above.
 
