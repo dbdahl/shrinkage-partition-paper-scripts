@@ -299,16 +299,16 @@ Below is a mapping between elements in the paper and the scripts that produce th
 | 0080-summarize-temporal.R           | ... continued                                |
 | 0090-jobs-year-by-year-timing       | "Time" column in Table 1                     |
 | 0100-year-by-year-timings.R         | ... continued                                |
-| 0110-jobs-dependent-timings         | Timing in Sections 6.2, 6.3, and 7.2         |
+| 0110-jobs-dependent-timings         | Timing in Sections 6.2, 6.3, and 7           |
 | 0120-dependent-timings.R            | ... continued                                |
-| 0130-jobs-timining-big              | Timing in Section 7.2                        |
+| 0130-jobs-timining-big              | Timing in Section 7                          |
 | 0140-summarize-timings-big.R        | ... continued                                |
-| 0150-jobs-timining-nclusters        | Timing in Section 7.2 for number of clusters |
+| 0150-jobs-timining-nclusters        | Timing in Section 7 for number of clusters   |
 | 0160-summarize-timings-nclusters.R  | ... continued                                |
-| 0210-jobs-simulated-data            | Prepare simulated data for Section 7.1       |
-| 0215-jobs-calibrate-priors          | Calibrate priors in Section 7.1              |
-| 0220-jobs-simulation                | Out-of-sample fits for Section 7.1           |
-| 0230-summarize-simulation.R         | ... continued                                |
+| 0210-jobs-simulated-data            | Prepare simulated data for Appendix E        |
+| 0215-jobs-calibrate-priors          | Calibrate priors in Appendix E               |
+| 0220-jobs-simulation                | Fits for Appendix E                          |
+| 0230-summarize-simulation.R         | Summarize fits for Appendix E                |
 
 File whose names start with "XX-" are helper scripts called or sourced by those above.
 
