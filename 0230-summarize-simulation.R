@@ -149,7 +149,15 @@ shrinkage_grit_plot <- function(background) {
       )
   } else {
     par(mar = c(4, 4, 0.2, 2) + 0.1, las = 1, family = "serif", xaxs = "i", yaxs = "i")
-    image.plot(out$shrinkage, out$grit, out[[background]], xlab = "", ylab = "", legend.width = 0.7, legend.mar = 4, bigplot = c(0.170, 0.82, 0.27, 0.97696), smallplot = c(0.84, 0.869, 0.295, 0.943856))
+    if (background == "expected_rand_index") {
+      by <- 0.008
+      breaks <- c(0, seq(0.50 - by / 2, 1.0 + by / 2, by = by))
+      zlim <- c(0, 1)
+      image.plot(out$shrinkage, out$grit, out[[background]], xlab = "", ylab = "", legend.width = 0.7, legend.mar = 4, bigplot = c(0.170, 0.82, 0.27, 0.97696), smallplot = c(0.84, 0.869, 0.295, 0.943856), zlim = zlim, breaks = breaks, nlevel = length(breaks)-1)
+    } else {
+      zlim <- c(0, 2.7)
+      image.plot(out$shrinkage, out$grit, out[[background]], xlab = "", ylab = "", legend.width = 0.7, legend.mar = 4, bigplot = c(0.170, 0.82, 0.27, 0.97696), smallplot = c(0.84, 0.869, 0.295, 0.943856), zlim = zlim)
+    }
     mtext("Shrinkage", 1, line = 2.5, las = 0)
     mtext("Grit", 2, line = 2.5, las = 0)
     contour(out$shrinkage, out$grit, exp(out$log_density), add = TRUE, lwd = 6, lty = 1, drawlabels = FALSE, col = "white")

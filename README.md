@@ -309,7 +309,8 @@ Below is a mapping between elements in the paper and the scripts that produce th
 | 0215-jobs-calibrate-priors          | Calibrate priors in Appendix E               |
 | 0220-jobs-simulation                | Fits for Appendix E                          |
 | 0230-summarize-simulation.R         | Summarize fits for Appendix E                |
-
+| 0310-ols-distances.R                | Left plot in Figure 3                        |
+| 0320-ols-hclust.R                   | ... continued                                |
 File whose names start with "XX-" are helper scripts called or sourced by those above.
 
 Other files included in this repository (e.g., \*.Rout, \*.RData, and \*.rds) are output files

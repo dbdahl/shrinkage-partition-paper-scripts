@@ -44,7 +44,7 @@ summary(fm)
 mean <- predict(fm, newdata, rankdeficient = "NA")
 sd <- summary(fm)$sigma
 
-result <- list(missing = sum(is.na(mean)),
+result <- list(fm = if (replication_number == 1) fm else NULL, missing = sum(is.na(mean)),
                logLike = if (replication_number == "1") NA else sum(dnorm(newdata$y, mean = mean, sd = sd, log = TRUE), na.rm = TRUE),
                time = proc.time())
 
