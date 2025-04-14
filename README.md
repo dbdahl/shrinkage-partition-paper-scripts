@@ -45,7 +45,7 @@ the District of Columbia (D.C.) are surveyed regarding their employment and
 demographic  information.  Data with harmonized variables are available from the
 years 1994 to 2020.  Applying sensible filters for our application (e.g., only
 including working individuals) yields 139,555 observations.  For simplicity,
-sampling weights are ignored for this  demonstration.
+sampling weights are ignored for this demonstration.
 
 ## Availability
 
@@ -57,10 +57,10 @@ If the data are publicly available, see the *Publicly available data* section. O
 
 ### Publicly available data
 
-- [x] Data are available online at: https://github.com/dbdahl/shrinkage-partition-paper-scripts  
-      See in particular the script '0010-clean.R' to read the data from the 'data-raw' directory.
+- [ ] Data are available online at:
 
-- [ ] Data are available as part of the paper’s supplementary material.
+- [x] Data are available as part of the paper’s supplementary material.
+      See in particular the script '0010-clean.R' to read the data from the 'data-raw' directory.
 
 - [ ] Data are publicly available by request, following the process described here:
 
@@ -153,8 +153,8 @@ Please cite all software packages in the References Section in similar fashion t
 -->
 
 Software implementing our SP distribution is available as an R package based
-on Rust <https://github.com/dbdahl/gourd-package>. The Git tag to use
-is [0.2.13](https://github.com/dbdahl/gourd-package/releases/tag/0.2.13).
+on Rust <https://github.com/XXXXXX/gourd-package>. The Git tag to use
+is [0.2.13](https://github.com/XXXXXX/gourd-package/releases/tag/0.2.13).
 A snapshot of the source package at this tag is included in this
 repository in the file 'gourd_0.2.13.tar.gz'.
 
@@ -244,8 +244,8 @@ The workflow is available:
 <!--
 Check all that apply, and in the case of a Git repository include unique identifier, such as specific commit ID, branch, release, or tag.
 -->
-- [ ] As part of the paper’s supplementary material.
-- [x] In this Git repository:  https://github.com/dbdahl/shrinkage-partition-paper-scripts
+- [x] As part of the paper’s supplementary material.
+- [ ] In this Git repository:
 - [ ] Other (please specify):
 
 <!--
@@ -273,7 +273,7 @@ Describe how to use the materials provided to reproduce analyses in the manuscri
 
 Steps:
 
-+ Clone the Git repository at https://github.com/dbdahl/shrinkage-partition-paper-scripts.
++ Download the paper's supplementary material.
 + Sort the scripts whose file names start with 4 digits, e.g. '0010-clean.R', '0014-jobs-ols', ..., '0230-summarize-simulation.R'
 + Run each script, in numerical order.
     + Scripts whose names end in '.R' should be run by R using, e.g., 'R CMD BATCH 0010-clean.R'.
@@ -306,11 +306,12 @@ Below is a mapping between elements in the paper and the scripts that produce th
 | 0150-jobs-timining-nclusters        | Timing in Section 7 for number of clusters   |
 | 0160-summarize-timings-nclusters.R  | ... continued                                |
 | 0210-jobs-simulated-data            | Prepare simulated data for Appendix E        |
-| 0215-jobs-calibrate-priors          | Calibrate priors in Appendix E               |
+| 0215-jobs-calibrate-priors          | Calibrate priors in Section 4.3              |
 | 0220-jobs-simulation                | Fits for Appendix E                          |
 | 0230-summarize-simulation.R         | Summarize fits for Appendix E                |
 | 0310-ols-distances.R                | Left plot in Figure 3                        |
 | 0320-ols-hclust.R                   | ... continued                                |
+
 File whose names start with "XX-" are helper scripts called or sourced by those above.
 
 Other files included in this repository (e.g., \*.Rout, \*.RData, and \*.rds) are output files
